@@ -9,63 +9,68 @@ library(stats)
 library(shiny)
 library(shinyFiles)
 library(ShortRead)
+library(shinyjs)
 
 # Aumenta o limite máximo de upload para 100MB
-options(shiny.maxRequestSize = 100 * 1024^2) 
+options(shiny.maxRequestSize = 100 * 1024^3) 
 
 # Interface do usuário
 ui <- fluidPage(
+  shinyjs::useShinyjs(),  
+  tags$style(HTML("
+  #qa_output {
+    color: black !important;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  ")),
+
+  
   titlePanel("Seleção de Pasta, Upload e Controle de Qualidade"),
   sidebarLayout(
     sidebarPanel(
-      # Botão para escolher diretório
       shinyDirButton("diretorio", "Escolher Pasta", "Selecionar"),
-      # Mostra o caminho da pasta escolhida
       verbatimTextOutput("caminhoPasta"),
-      # Upload de arquivos
       fileInput("arquivos", "Escolha os arquivos", 
                 multiple = TRUE, 
                 accept = c(".fasta", ".fa", ".fastq", ".fq", "text/plain")),
-      # Botão para iniciar análise
       actionButton("run_analysis", "Rodar Controle de Qualidade")
     ),
     mainPanel(
-      # Tabela com os arquivos selecionados
       tableOutput("conteudoArquivos"),
-      # Saída com tempo de execução
-      verbatimTextOutput("qa_output")
+      htmlOutput("qa_output")  # precisa ser htmlOutput pra funcionar com shinyjs
     )
   )
 )
 
+
 # Lógica do servidor
 server <- function(input, output, session) {
-  # Define volumes acessíveis
   volumes <- c(Home = fs::path_home(), "C:" = "C:/", "D:" = "D:/")
   shinyDirChoose(input, "diretorio", roots = volumes, session = session)
   
-  dir_path <- reactiveVal(NULL)  # Armazena o caminho da pasta selecionada
+  dir_path <- reactiveVal(NULL)
   
-  # Atualiza caminho da pasta quando selecionada
   observeEvent(input$diretorio, {
     path <- parseDirPath(volumes, input$diretorio)
     dir_path(path)
   })
   
-  # Mostra caminho da pasta
   output$caminhoPasta <- renderText({
     req(dir_path())
     paste("Pasta selecionada:", dir_path())
   })
   
-  # Mostra tabela com arquivos selecionados
   output$conteudoArquivos <- renderTable({
     req(input$arquivos)
     data.frame(Nome_Arquivo = input$arquivos$name, Caminho = input$arquivos$datapath)
   })
   
-  # Quando botão for clicado, roda controle de qualidade
   observeEvent(input$run_analysis, {
+    # Atualiza imediatamente com "QC em andamento..."
+    shinyjs::html("qa_output", '<b style="color:black">QC em andamento...</b>')
+    
+    # Determina arquivos
     if (!is.null(input$arquivos)) {
       fls <- input$arquivos$datapath
     } else if (!is.null(dir_path())) {
@@ -77,24 +82,22 @@ server <- function(input, output, session) {
     
     if (length(fls) == 0) {
       showNotification("Nenhum arquivo FASTQ encontrado!", type = "error")
-    } else {
-      # Início da contagem de tempo
-      tempo_inicio <- Sys.time()
-      
-      # Executa controle de qualidade
-      qaSummary <- qa(fls, type = "fastq")
-      report_path <- report(qaSummary)
-      browseURL(report_path)
-      
-      # Fim da contagem de tempo
-      tempo_fim <- Sys.time()
-      tempo_execucao <- tempo_fim - tempo_inicio
-      
-      # Exibe tempo de execução
-      output$qa_output <- renderText({
-        paste("Tempo de execução do controle de qualidade:", round(tempo_execucao, 2), "segundos")
-      })
+      return()
     }
+    
+    # QC
+    tempo_inicio <- Sys.time()
+    qaSummary <- qa(fls, type = "fastq")
+    report_path <- report(qaSummary)
+    browseURL(report_path)
+    tempo_fim <- Sys.time()
+    tempo_execucao <- tempo_fim - tempo_inicio
+    
+    # Atualiza resultado final
+    shinyjs::html("qa_output",
+                  paste0('<b style="color:black">Tempo de execução:</b> ',
+                         round(tempo_execucao, 2), ' segundos'))
+    
   })
 }
 

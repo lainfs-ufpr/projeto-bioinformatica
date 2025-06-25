@@ -1,0 +1,139 @@
+```{R}
+library(stats)
+library(shiny)
+library(shinyFiles)
+library(ShortRead)
+library(shinyjs)
+library(dplyr)
+library(ggplot2)
+library(Biostrings)
+library(reshape2)
+
+# Arquivos de teste
+arquivo_fastq <- "C:/Users/vitor/Documents/ufpr/projeto-bioinformatica/fastq_gerados/output2.fastq"
+arquivo_fastq <- "C:/Users/vitor/Documents/ufpr/projeto-bioinformatica/mock.fastq"
+arquivo_fastq <- "C:/Users/vitor/Documents/ufpr/projeto-bioinformatica/mock2.fastq"
+
+adapter_fasta <- readDNAStringSet("C:/Users/vitor/Documents/ufpr/projeto-bioinformatica/teste_funcoes/adapter_contamination/adapters.fasta")
+
+fq <- readFastq(arquivo_fastq)
+seqs <- sread(fq)
+
+adapter_hits <- sapply(adapter_fasta, function(adapter_seq) {
+  sum(vcountPattern(adapter_seq, seqs) > 0)
+})
+
+adapter_df <- data.frame(
+  Adapter = names(adapter_hits),
+  Count = as.integer(adapter_hits)
+)
+
+adapter_df_filtered <- adapter_df %>%
+  filter(Count > 0)
+
+adapter_plot <- ggplot(adapter_df_filtered, aes(x = reorder(Adapter, -Count), y = Count)) +
+  geom_col(fill = "steelblue") +
+  scale_y_continuous(breaks = pretty_breaks(n = 10), labels = function(x) ifelse(x %% 1 == 0, x, "")) +
+  labs(title = "Adapter Contamination",
+       x = "Adapter",
+       y = "Number of Contaminated Reads") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major.x = element_blank()
+  )
+
+```
+
+```{r}
+
+# For each adapter, a vector of 0/1 per read
+adapter_matrix <- sapply(adapter_fasta, function(adapter_seq) {
+  as.integer(vcountPattern(adapter_seq, seqs) > 0)
+})
+
+# Add read index
+adapter_df_long <- data.frame(Read = 1:length(seqs), adapter_matrix)
+
+# Get read lengths (assume constant if needed)
+read_lengths <- nchar(as.character(adapter_df_long$Read))
+
+# Or if variable:
+read_lengths <- nchar(as.character(sread(fq)))  # from your FASTQ file
+
+# Cumulative base positions (end of each read)
+cum_bases <- cumsum(read_lengths)
+
+# Start positions
+start_bases <- c(1, head(cum_bases + 1, -1))
+
+# Add to adapter_df_long
+adapter_df_long$StartBP <- start_bases
+adapter_df_long$EndBP <- cum_bases
+
+adapter_long <- melt(adapter_df_long, id.vars = c("StartBP", "EndBP", "Read"),
+                     variable.name = "Adapter", value.name = "Hit")
+
+# Cumulative sum and proportion by adapter
+adapter_long <- adapter_long %>%
+  group_by(Adapter) %>%
+  arrange(StartBP) %>%
+  mutate(
+    CumHits = cumsum(Hit),
+    Prop = CumHits / max(Read)
+  )
+
+# Separate datasets for adapters that had hits and adapters with no hits
+adapter_hit_info <- adapter_long %>%
+  group_by(Adapter) %>%
+  summarise(has_hits = any(Hit > 0), .groups = "drop")
+hit_adapters <- adapter_hit_info$Adapter[adapter_hit_info$has_hits]
+adapter_with_hits <- adapter_long %>%
+  filter(Adapter %in% hit_adapters)
+adapter_no_hits <- adapter_long %>%
+  filter(!Adapter %in% hit_adapters)
+adapter_with_hits$Adapter <- factor(adapter_with_hits$Adapter)
+
+# Check if there are any hits
+any_hits <- any(adapter_with_hits$Prop > 0)
+
+# If yes, compute custom scale; else, use default
+if (any_hits) {
+  max_y <- max(adapter_with_hits$Prop)
+  top_break <- ceiling(max_y * 20) / 20  # round up to nearest 5%
+  breaks_y <- seq(0, top_break, by = 0.05)
+
+  y_scale <- scale_y_continuous(
+    limits = c(0, top_break),
+    breaks = breaks_y,
+    labels = scales::percent_format(accuracy = 1)
+  )
+} else {
+  y_scale <- scale_y_continuous(
+    limits = c(0, NA),
+    expand = c(0, 0),  
+    labels = scales::percent_format(accuracy = 1)
+  )
+}
+
+# Plot
+adapter_plot2 <- ggplot() +
+  geom_line(data = adapter_no_hits,
+            aes(x = StartBP, y = Prop, group = Adapter),
+            color = "grey70", alpha = 0.5, linewidth = 0.5, show.legend = FALSE) +
+  geom_line(data = adapter_with_hits,
+            aes(x = StartBP, y = Prop, group = Adapter, color = Adapter),
+            alpha = 0.8, linewidth = 1, show.legend = TRUE) +
+  # Apply to y-axis
+  y_scale +
+  labs(title = "Cumulative Adapter Contamination Across Reads",
+       x = "Base Pair Position",
+       y = "Proportion of Contaminated Reads") +
+  theme_minimal() +
+  theme(
+    legend.position = "right",
+    legend.title = element_blank()
+  )
+
+
+```

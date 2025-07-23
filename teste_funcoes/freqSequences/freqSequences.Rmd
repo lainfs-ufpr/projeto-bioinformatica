@@ -11,11 +11,12 @@ library(shinyjs)
 library(dplyr)
 library(ggplot2)
 library(Biostrings)
+library(gridExtra)
+library(grid)
 
 arquivo_fastq <- "C:/Users/vitor/Documents/ufpr/projeto-bioinformatica/fastq_gerados/output2.fastq"
-arquivo_fastq <- "C:/Users/vitor/Documents/ufpr/projeto-bioinformatica/mock.fastq"
-arquivo_fastq <- "C:/Users/vitor/Documents/ufpr/projeto-bioinformatica/mock2.fastq"
-
+arquivo_fastq <- "C:/Users/vitor/Documents/ufpr/projeto-bioinformatica/teste_funcoes/adapter_contamination/mock.fastq"
+arquivo_fastq <- "C:/Users/vitor/Documents/ufpr/projeto-bioinformatica/teste_funcoes/adapter_contamination/mock2.fastq"
 
 freqSequences <- function(qa, read, n=20)
 {
@@ -44,8 +45,7 @@ freqsequences$possible_hit <- sapply(freqsequences$sequence, function(seq) {
   }
 })
 
-library(gridExtra)
-library(grid)
+
 
 # Set PNG output
 png("frequent_sequences_table.png", width = 1000, height = 400)

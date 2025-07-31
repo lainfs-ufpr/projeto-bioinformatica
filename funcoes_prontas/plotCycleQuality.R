@@ -4,7 +4,6 @@
 source("instalar_pacotes.R")
 cran_pkgs <- c("ggplot2", "plotly", "htmlwidgets", "dplyr")
 bioc_pkgs <- c("ShortRead")
-
 instalar_pacotes(cran_pkgs, install.packages)
 instalar_pacotes(bioc_pkgs, BiocManager::install)
 
@@ -22,7 +21,7 @@ library(ggplot2)
 # Return - lista com plot interativo e plot estático
 # -------------------------------------------
 
-plotCycleQuality <- function(qa_output, cor_linhas="royalblue") {
+plotCycleQuality <- function(qa_output) {
   
   # Pegar qualidade por ciclo sem processamento
   df <- qa_output[["perCycle"]][["quality"]]
@@ -44,12 +43,12 @@ plotCycleQuality <- function(qa_output, cor_linhas="royalblue") {
     split = ~lane, # Dividir linhas por 'lane'
     type = 'scatter',
     mode = 'lines',
-    color = I(cor_linhas),
+    color = I("black"),
     hoverinfo = 'text', # Informações que aparecem ao passar o mouse
     text = ~paste("Amostra:", lane, # Texto exibido ao passar o mouse
                   "<br>Ciclo:", Cycle,
                   "<br>Score Mediano:", round(Median, 2))
-  ) %>% layout(
+  ) %>% plotly::layout(
     # Adicionar retângulos de fundo para indicar qualidade
     shapes = list(
       # Faixa vermelha clara: qualidade ruim (0–20)
@@ -66,35 +65,55 @@ plotCycleQuality <- function(qa_output, cor_linhas="royalblue") {
            line = list(width = 0), layer = "below")
     ),
     title = "Qualidade das Sequências por Ciclo",
-    xaxis = list(title = "Ciclo da Sequência"),
+    xaxis = list(title = "Ciclo"),
     yaxis = list(title = "Score de Qualidade (Phred)", range = c(0, 42)),
     showlegend = FALSE
   )
+
+  colnames(df_median) <- c("Arquivo", "Cycle", "Median")
+  
+  # Montar paleta de cores
+  n <- length(unique(df_median$Arquivo))
+  cor_inicial <- "#000000"  # preto
+  cor_final <- "grey70"    # grey20
+  
+  # Criar função interpoladora de cores
+  paleta_preto_cinza <- col_numeric(
+    palette = c(cor_inicial, cor_final),
+    domain = c(1, n)
+  )
+  
+  # Gerar vetor de cores para n valores
+  cores <- paleta_preto_cinza(1:n)
   
   # Montar plot estático
-  p_estatico <- ggplot(df_median, aes(x = Cycle, y = Median, group = lane)) +
+  p_estatico <- ggplot(df_median, aes(x = Cycle, y = Median, group = Arquivo)) +
     
     # Camada 1: Retângulos de fundo para indicar a qualidade
     geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 28, ymax = 42),
-              fill = "#d0f0d0", alpha = 0.5) + # Verde
+              fill = "#d0f0d0", alpha = 0.02) + # Verde
     geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 20, ymax = 28),
-              fill = "#f0f0d0", alpha = 0.5) + # Amarelo
+              fill = "#f0f0d0", alpha = 0.02) + # Amarelo
     geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = 20),
-              fill = "#f0d0d0", alpha = 0.5) +   # Vermelho
+              fill = "#f0d0d0", alpha = 0.02) +   # Vermelho
     
     # Camada 2: Linhas de qualidade para cada amostra
-    # O 'group = lane' garante que cada amostra tenha sua própria linha.
-    geom_line(color = cor_linhas, linewidth = 0.7) +
+    geom_line(aes(color = Arquivo), linewidth = 0.7, show.legend = TRUE) +
     
     # Camada 3: Títulos, legendas e tema visual
     labs(
       title = "Qualidade das Sequências por Ciclo",
-      x = "Ciclo da Sequência",
+      x = "Ciclo",
       y = "Score de Qualidade (Phred)"
     ) +
     scale_y_continuous(limits = c(0, 42), expand = c(0, 0)) +
     scale_x_continuous(expand = c(0, 0)) +
-    theme_bw()
+    scale_color_manual(values = cores) +
+    theme(legend.position = "bottom",
+          panel.background = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(color = "grey"))
   
   return(list(p_interativo=p_interativo, 
               p_estatico=p_estatico))

@@ -17,44 +17,77 @@ library(stats)
 #          n_frequentes: número de sequências mais frequentes para retornar
 # Return - freqSequences_table: tabela com sequências mais frequentes
 # -------------------------------------------
-freqSequences <- function(qa_output, read="read", n_frequentes=20) {
+freqSequences <- function(qa_output, n_frequentes = 20) {
   
   # Ler arquivo de adapters
   adapter_fasta <- readDNAStringSet("adapters.fasta")
   
-  # Contagens
-  cnt <- qa_output[["readCounts"]]
+  # Contagens de todos os arquivos
+  all_counts <- qa_output[["readCounts"]]
   
-  # Frequencia das sequencias
-  df <- qa_output[["frequentSequences"]]
+  # Sequências frequentes (de todos os arquivos) com frequencia > 1
+  df <- qa_output[["frequentSequences"]] %>%
+          filter(count > 1)
   
-  # Filtra as sequencias do tipo especificado (por padrao: "read")
-  df_filtrada <- df[df$type==read,]
-  
-  # Calcula a proporcao da sequencia em relacao ao total de leituras 
-  df_filtrada[["ppn"]] <- df_filtrada[["count"]] / cnt[df_filtrada[["lane"]], read]
-  
-  # Seleciona as sequencias mais frequentes (por padrao: 20), com colunas especificas
-  freqSequences_df <- head(df_filtrada[order(df_filtrada$count,
-                                             decreasing=TRUE),
-                                             c("sequence", "count")],
-                           n_frequentes)
-  
-  # Remove nome das linhas pra simplificar
-  rownames(freqSequences_df) <- NULL
-  
-  # Verifica se sao adapters conhecidos
-  freqSequences_df$possible_hit <- sapply(freqSequences_df$sequence, function(seq) {
-    matches <- vcountPattern(DNAString(seq), adapter_fasta, fixed=FALSE)
-    if (any(matches > 0)) {
-      # Retorna o nome do adapter que tem mais hits
-      names(adapter_fasta)[which.max(matches)] 
-    } else {
-      "no hit"
+  resultados <- list()
+  # Itera sobre os arquivos (ou lanes)
+  for (lane_name in rownames(all_counts)) {
+    
+    # Filtra apenas as sequências da lane atual
+    df_filtrada <- df[df$type == "read" & df$lane == lane_name, ]
+    
+    # Pega total de reads dessa lane
+    total_reads <- all_counts[lane_name, "read"]
+    
+    # Calcula a proporção
+    df_filtrada[["ppn"]] <- df_filtrada[["count"]] / total_reads
+    
+    if (nrow(df_filtrada) == 0) {
+      # Adiciona entrada informando ausência de sequências frequentes
+      resultados[[lane_name]] <- data.frame(
+        Sequência = NA,
+        Frequência = NA,
+        Adaptador = "Sem sequências com >1 ocorrência",
+        Arquivo = lane_name,
+        stringsAsFactors = FALSE
+      )
+      next
     }
-  })
+    
+    # Seleciona as mais frequentes
+    top_df <- head(df_filtrada[order(df_filtrada$count, decreasing = TRUE),
+                               c("sequence", "count")],
+                   n_frequentes)
+    
+    # Verifica se são adaptadores conhecidos
+    top_df$possible_hit <- sapply(top_df$sequence, function(seq) {
+      matches <- vcountPattern(DNAString(seq), adapter_fasta, fixed = FALSE)
+      if (any(matches > 0)) {
+        names(adapter_fasta)[which.max(matches)]
+      } else {
+        "Sem hit"
+      }
+    })
+    
+    # Adiciona coluna do nome do arquivo (ou lane)
+    top_df$arquivo <- lane_name
+    
+    # Adiciona aos resultados
+    resultados[[lane_name]] <- top_df
+  }
   
-  freqSequences_tabela <- table(freqSequences_df)
+  # Junta tudo em uma única tabela
+  df_final <- do.call(rbind, resultados)
   
-  return(freqSequences_tabela)
+  # Organiza colunas e nomes
+  colnames(df_final) <- c("Sequência", "Frequência", "Adaptador", "Arquivo")
+  rownames(df_final) <- NULL
+  
+  # Reordena colunas para deixar "Arquivo" primeiro
+  df_final <- df_final[, c("Arquivo", "Sequência", "Frequência", "Adaptador")]
+  
+  # Remove repetições visuais do nome do arquivo mesclando
+  df_final$Arquivo <- as.character(df_final$Arquivo)
+
+  return(df_final)
 }

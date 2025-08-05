@@ -1,3 +1,16 @@
+library(plotly)
+library(viridis)
+library(bslib)
+library(shiny)
+library(shinyjs)
+library(shinyFiles)
+library(ShortRead)
+library(ggplot2)
+library(fs)
+library(scales)  
+
+# Carregar pacotes
+
 source("funcoes_prontas/plotAdapterContamination.R")
 source("funcoes_prontas/tableAdapterContamination.R")
 source("funcoes_prontas/freqSequences.R")
@@ -6,94 +19,121 @@ source("funcoes_prontas/plotNucleotideCount.R")
 source("funcoes_prontas/readQualityScore.R")
 source("funcoes_prontas/plotOcurrences.R")
 
-# Instale o BiocManager se ainda não estiver instalado
-if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
+# Tamanho máximo de input
+options(shiny.maxRequestSize = 100 * 1024^3)
 
-# Instale os pacotes
-BiocManager::install(c("shiny", "shinyFiles", "ShortRead"), force=TRUE)
-
-library(stats)
-library(shiny)
-library(shinyFiles)
-library(ShortRead)
-library(shinyjs)
-
-# Aumenta o limite máximo de upload para 100MB
-options(shiny.maxRequestSize = 100 * 1024^3) 
-
-# Interface do usuário
+# Front end
 ui <- fluidPage(
-  shinyjs::useShinyjs(),  
-  tags$style(HTML("
-   #qa_output {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          background-color: #f2f2f2;
-          padding: 10px;
-          text-align: center;
-          border-top: 1px solid #ccc;
-          z-index: 9999;  
-    }
-  ")),
-  tags$style(HTML("
-    table {
-      font-size: 10px;
-    }
-  ")),
-
-  titlePanel("Seleção de Pasta, Upload e Controle de Qualidade"),
+  theme = bs_theme(version = 5, bg = "#FFFFFF", fg = "#31231a", 
+                   bootswatch = "flatly", primary = "#1a754f", 
+                   base_font = font_google("Lexend Deca")),
+  useShinyjs(),
+  
+  # Procura o arquivo css na pasta www do diretório onde está rodando
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
+  
+  tags$h1("Controle de Qualidade de Sequências FASTQ", class = "titulo-app"),
+  
   sidebarLayout(
     sidebarPanel(
-      shinyDirButton("diretorio", "Escolher Pasta", "Selecionar"),
-      verbatimTextOutput("caminhoPasta"),
-      fileInput("arquivos", "Escolha os arquivos", 
-                multiple = TRUE, 
-                accept = c(".fasta", ".fa", ".fastq", ".fq", "text/plain")),
-      actionButton("run_analysis", "Rodar Controle de Qualidade")
+      class = "sidebar-custom",
+      
+      tags$h4("Para inicializar a análise, selecione o(s) arquivo(s) ou uma pasta", 
+              class = "titulo-sidebar"),
+      
+      div(
+        shinyDirButton("diretorio", "Adicionar uma pasta", "Selecionar"),
+        div(class = "file-input-custom", 
+            fileInput("arquivos", "Adicionar um arquivo", multiple = TRUE,
+                      accept = c(".fasta", ".fa", ".fastq", ".fq", "text/plain"))),
+        style = "text-align: center;
+                  color: #f0ffff;
+                  display: flex; 
+                  gap: 10px; 
+                  margin-bottom: 20px;"
+      ),
+      
+      div(id = "loading_animation", class = "loading-spinner",
+          style = "display: none;"),
+      
+      # Botão iniciar QA
+      div(style = "text-align: center;",
+        actionButton("run_analysis", "Rodar controle de qualidade",
+                     class = "btnQA-custom")),
+     
+      # Aumentar espaço
+      tags$br(),
+      tags$br(),
+      
+      selectInput("palette_choice", "Mude a paleta de cores aqui:",
+                  choices = c("viridis", "magma", "plasma", "rocket",
+                              "cividis", "inferno", "turbo", "mako"),
+                  selected = "viridis")
     ),
+    
+    # Paineis de gráficos
     mainPanel(
       tabsetPanel(
         tabPanel("Qualidade por Ciclo",
-                 plotOutput("plot_qualidade_ciclo")),
+                 class = "titulo-plots",
+                 plotOutput("plot_qualidade_ciclo_est"),
+                 downloadButton("download_plot_ciclo", "Baixar gráfico")),
         tabPanel("Qualidade Média",
-                 plotOutput("plot_qualidade_media")),
+                 class = "titulo-plots",
+                 plotOutput("plot_qualidade_media_est"),
+                 downloadButton("download_plot_media", "Baixar gráfico")),
         tabPanel("Contagem de Bases",
-                 plotOutput("plot_contagens")),
+                 class = "titulo-plots",
+                 plotOutput("plot_contagens_est"),
+                 downloadButton("download_plot_contagens", "Baixar gráfico")),
+        tabPanel("Distribuição Cumulativa de Leituras",
+                 class = "titulo-plots",
+                 plotOutput("plot_ocorrencias_est"),
+                 downloadButton("download_plot_ocorrencias", "Baixar gráfico")),
         tabPanel("Sequências Frequentes",
+                 class = "titulo-plots",
                  tableOutput("tabela_frequencias")),
         tabPanel("Contaminação por Adaptadores",
-                 div(
-                   plotOutput("plot_adapters"),
-                   br(),  
-                   tableOutput("tabela_adapters")
-                 )
-                )
-      )
+                 class = "titulo-plots",
+                 plotOutput("plot_adapters_est"),
+                 downloadButton("download_plot_adapters", "Baixar gráfico"),
+                 tableOutput("tabela_adapters"))
+      ),
+      br(), hr(),
+      div(id = "qa_output")
     )
   ),
-  div(id = "qa_output")
+  
+  div(style = "margin-left: 20px;",
+      textOutput("caminhoPasta") 
+  )
 )
 
-# Lógica do servidor
+# Backend - servidor
 server <- function(input, output, session) {
+  
+  # Usa o conteudo html de um arquivo separado
+  html_content <- HTML(paste(readLines("www/apresentacao.html",
+                                       encoding = "UTF-8"), collapse = "\n"))
+  
+  # Cria uma tela inicial como se fosse uma caixa de dialogo
+  showModal(modalDialog(
+    title = NULL,
+    html_content,
+    size = "l",
+    easyClose = TRUE,
+    footer = modalButton("Iniciar")
+  ))
+  
   volumes <- c(Home = fs::path_home(), "C:" = "C:/", "D:" = "D:/")
   shinyDirChoose(input, "diretorio", roots = volumes, session = session)
-
+  
   dir_path <- reactiveVal(NULL)
-  plot_qualidade_ciclo_reactive <- reactiveVal(NULL)
-  plot_qualidade_media_reactive <- reactiveVal(NULL)
-  plot_contagens_reactive <- reactiveVal(NULL)
-  tabela_frequencias_reactive <- reactiveVal(NULL)
-  plot_adapters_reactive <- reactiveVal(NULL)
-  tabela_adapters_reactive <- reactiveVal(NULL)
-
+  resultado_qa <- reactiveVal(NULL)
+  
   observeEvent(input$diretorio, {
     path <- parseDirPath(volumes, input$diretorio)
     dir_path(path)
-
   })
   
   output$caminhoPasta <- renderText({
@@ -101,128 +141,241 @@ server <- function(input, output, session) {
     paste("Pasta selecionada:", dir_path())
   })
   
-  output$conteudoArquivos <- renderTable({
-    req(input$arquivos)
-    data.frame(Nome_Arquivo = input$arquivos$name, Caminho = input$arquivos$datapath)
-  })
-  
+  # Rodar analise
   observeEvent(input$run_analysis, {
-    # Atualiza imediatamente com "QC em andamento..."
-    shinyjs::html("qa_output", '<b style="color:black">QC em andamento...</b>')
+    shinyjs::hide("run_analysis")
+    shinyjs::show("loading_animation")
+    shinyjs::html("qa_output",
+                  '<b style="color: #31231a">Controle de Qualidade em andamento...</b>')
     
-    # Determina arquivos
-    if (!is.null(input$arquivos)) {
-      fls <- input$arquivos$datapath
+    fls <- if (!is.null(input$arquivos)) {
+      input$arquivos$datapath
     } else if (!is.null(dir_path())) {
-      fls <- dir(dir_path(), pattern = "*fq$", full.names = TRUE)
+      dir(dir_path(), pattern = "*fq$", full.names = TRUE)
     } else {
       showNotification("Nenhum arquivo fornecido!", type = "error")
+      shinyjs::show("run_analysis")
+      shinyjs::hide("loading_animation")
       return()
     }
     
     if (length(fls) == 0) {
       showNotification("Nenhum arquivo FASTQ encontrado!", type = "error")
+      shinyjs::show("run_analysis")
+      shinyjs::hide("loading_animation")
       return()
     }
     
-    # print(fls)
-    
     tryCatch({
-    
-      # QC
       tempo_inicio <- Sys.time()
+      resultado <- qa(fls, type = "fastq")
+      resultado_qa(resultado)
       
-      # Função original do ShortRead
-      resultado_qa <- qa(fls, type = "fastq")
-
-      # Plots personalizados
-      print("Plot ciclo")
-      qualidade_ciclo <- plotCycleQuality(resultado_qa)
-      plot_qualidade_ciclo <- qualidade_ciclo$p_estatico
-      plot_qualidade_ciclo$data$Arquivo <- input$arquivos$name[
-        match(plot_qualidade_ciclo$data$Arquivo,
-              unique(plot_qualidade_ciclo$data$Arquivo))
-      ]
-      plot_qualidade_ciclo_reactive(plot_qualidade_ciclo)
-      
-      print("Qualidade média")
-      plot_qualidade_media <- readQualityScore(resultado_qa)
-      plot_qualidade_media$data$Arquivo <- input$arquivos$name[
-        match(plot_qualidade_media$data$Arquivo,
-              unique(plot_qualidade_media$data$Arquivo))
-      ]
-      plot_qualidade_media_reactive(plot_qualidade_media)
-      
-      print("Contagens")
-      plot_contagens <- plotNucleotideCount(fls)
-      plot_contagens$data$Arquivo <- input$arquivos$name[
-        match(plot_contagens$data$Arquivo,
-              unique(plot_contagens$data$Arquivo))
-      ]
-      plot_contagens_reactive(plot_contagens)
-      
-      print("Freq seq")
-      tabela_frequencias <- freqSequences(resultado_qa)
-      tabela_frequencias$Arquivo <- input$arquivos$name[
-        match(tabela_frequencias$Arquivo,
-              unique(tabela_frequencias$Arquivo))
-      ]
-      tabela_frequencias$Arquivo <- ifelse(duplicated(tabela_frequencias$Arquivo),
-                                           "",
-                                           tabela_frequencias$Arquivo)
-      tabela_frequencias_reactive(tabela_frequencias)
-      
-      print("Adapters plot")
-      plot_adapters <- plotAdapterContamination(fls)
-      plot_adapters_reactive(plot_adapters)
-      
-      print("Adapters table")
-      tabela_adapters <- tableAdapterContamination(fls)
-      tabela_adapters_reactive(tabela_adapters)
-      
-      tempo_fim <- Sys.time()
-      tempo_execucao <- tempo_fim - tempo_inicio
-      
-      # Atualiza resultado final
+      tempo_execucao <- Sys.time() - tempo_inicio
       shinyjs::html("qa_output",
-                    paste0('<b style="color:black">QC finalizado! Tempo de execução:</b> ',
+                    paste0('<b style="color: #31231a">Controle de Qualidade finalizado! Tempo de execução:</b> ',
                            round(tempo_execucao, 2), ' segundos'))
+      shinyjs::hide("loading_animation")
+      shinyjs::show("run_analysis")
+      
     }, error = function(e) {
-      print(paste("Erro detectado:", e$message))
+      shinyjs::html("qa_output",
+                    paste0('<b style="color: #940e01">Erro: ', e$message, '</b>'))
+      shinyjs::hide("loading_animation")
+      shinyjs::show("run_analysis")
     })
-    
   })
   
-  output$plot_qualidade_ciclo <- renderPlot({
-    req(plot_qualidade_ciclo_reactive())
-    plot_qualidade_ciclo_reactive()
+  # Paleta de cores escolhida
+  paleta_cores <- reactive({
+    req(input$palette_choice)
+    tolower(input$palette_choice)
   })
   
-  output$plot_contagens <- renderPlot({
-    req(plot_contagens_reactive())
-    plot_contagens_reactive()
+  # Nomes originais dos arquivos para ajustar
+  nomes_arquivos <- reactive({
+    req(input$arquivos)
+    input$arquivos$name
   })
   
-  output$plot_qualidade_media <- renderPlot({
-    req(plot_qualidade_media_reactive())
-    plot_qualidade_media_reactive()
+  # Plot qualidade ciclo
+  output$plot_qualidade_ciclo_est <- renderPlot({
+    req(resultado_qa())
+    plotCycleQuality(resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
   })
   
+  output$plot_qualidade_ciclo_int <- renderPlot({
+    req(resultado_qa())
+    plotCycleQuality(resultado_qa(), paleta_cores(), nomes_arquivos())$p_interativo
+  })
+  
+  output$download_plot_ciclo <- downloadHandler(
+    filename = function() { "qualidade_ciclo.png" },
+    content = function(file) {
+      req(resultado_qa(), paleta_cores())
+      p <- plotCycleQuality(resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
+      ggsave(file, p,
+             width = 8, height = 6)
+    }
+  )
+  
+  # Plot qualidade média 
+  output$plot_qualidade_media_est <- renderPlot({
+    req(resultado_qa())
+    readQualityScore(resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
+  })
+  
+  output$plot_qualidade_media_int <- renderPlot({
+    req(resultado_qa())
+    readQualityScore(resultado_qa(), paleta_cores(), nomes_arquivos())$p_interativo
+  })
+  
+  output$download_plot_media <- downloadHandler(
+    filename = function() { "qualidade_media.png" },
+    content = function(file) {
+      req(resultado_qa())
+      p <- readQualityScore(resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
+      ggsave(file, p,
+             width = 8, height = 6)
+    }
+  )
+  
+  # Plot contagem bases
+  output$plot_contagens_est <- renderPlot({
+    fls <- if (!is.null(input$arquivos)) {
+      input$arquivos$datapath
+    } else if (!is.null(dir_path())) {
+      dir(dir_path(), pattern = "*fq$", full.names = TRUE)
+    } else {
+      NULL
+    }
+    req(fls)
+    plotNucleotideCount(fls, paleta_cores(), nomes_arquivos())$p_estatico
+  })
+  
+  output$plot_contagens_int <- renderPlot({
+    fls <- if (!is.null(input$arquivos)) {
+      input$arquivos$datapath
+    } else if (!is.null(dir_path())) {
+      dir(dir_path(), pattern = "*fq$", full.names = TRUE)
+    } else {
+      NULL
+    }
+    req(fls)
+    plotNucleotideCount(fls, paleta_cores(), nomes_arquivos())$p_interativo
+  })
+
+  output$download_plot_contagens <- downloadHandler(
+    filename = function() { "contagem_bases.png" },
+    content = function(file) {
+      fls <- if (!is.null(input$arquivos)) {
+        input$arquivos$datapath
+      } else if (!is.null(dir_path())) {
+        dir(dir_path(), pattern = "*fq$", full.names = TRUE)
+      } else {
+        NULL
+      }
+      req(fls)
+      p <- plotNucleotideCount(fls, paleta_cores(), nomes_arquivos())$p_estatico
+      ggsave(file, p,
+             width = 8, height = 6)
+    }
+  )
+  
+  # Plot adapters
+  output$plot_adapters_est <- renderPlot({
+    fls <- if (!is.null(input$arquivos)) {
+      input$arquivos$datapath
+    } else if (!is.null(dir_path())) {
+      dir(dir_path(), pattern = "*fq$", full.names = TRUE)
+    } else {
+      NULL
+    }
+    req(fls)
+    plotAdapterContamination(fls, paleta_cores())$p_estatico
+  })
+  
+  output$plot_adapters_int <- renderPlot({
+    fls <- if (!is.null(input$arquivos)) {
+      input$arquivos$datapath
+    } else if (!is.null(dir_path())) {
+      dir(dir_path(), pattern = "*fq$", full.names = TRUE)
+    } else {
+      NULL
+    }
+    req(fls)
+    plotAdapterContamination(fls, paleta_cores())$p_interativo
+  })
+  
+  output$download_plot_adapters <- downloadHandler(
+    filename = function() { "contaminacao_adaptadores.png" },
+    content = function(file) {
+      fls <- if (!is.null(input$arquivos)) {
+        input$arquivos$datapath
+      } else if (!is.null(dir_path())) {
+        dir(dir_path(), pattern = "*fq$", full.names = TRUE)
+      } else {
+        NULL
+      }
+      req(fls)
+      p <- plotAdapterContamination(fls, paleta_cores())$p_estatico
+      ggsave(file, p, width = 8, height = 6)
+    }
+  )
+  
+  # Plot ocorrencias
+  output$plot_ocorrencias_est <- renderPlot({
+    req(resultado_qa())
+    plotOcurrences(resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
+  })
+  
+  output$plot_ocorrencias_int <- renderPlot({
+    req(resultado_qa())
+    plotOcurrences(resultado_qa(), paleta_cores(), nomes_arquivos())$p_interativo
+  })
+  
+  output$download_plot_ocorrencias <- downloadHandler(
+    filename = function() { "distribuicao_ocorrencias.png" },
+    content = function(file) {
+      req(resultado_qa())
+      plotOcurrences(resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
+      ggsave(file, p,
+             width = 8, height = 6)
+    }
+  )
+
+  # Tabela sequencias frequentes
   output$tabela_frequencias <- renderTable({
-    req(tabela_frequencias_reactive())
-    tabela_frequencias_reactive()
+    req(resultado_qa())
+    t <- freqSequences(resultado_qa())
+    t$Arquivo <- input$arquivos$name[
+      match(t$Arquivo,
+            unique(t$Arquivo))
+    ]
+    t$Arquivo <- ifelse(duplicated(t$Arquivo),
+                                    "",
+                                    t$Arquivo)
+    t
   })
   
-  output$plot_adapters <- renderPlot({
-    req(plot_adapters_reactive())
-    plot_adapters_reactive()
-  })
-  
+  # Tabela adapters
   output$tabela_adapters <- renderTable({
-    req(tabela_adapters_reactive())
-    tabela_adapters_reactive()
+    fls <- if (!is.null(input$arquivos)) {
+      input$arquivos$datapath
+    } else if (!is.null(dir_path())) {
+      dir(dir_path(), pattern = "*fq$", full.names = TRUE)
+    } else {
+      NULL
+    }
+    req(fls)
+    t <- tableAdapterContamination(fls)
+    t$Arquivo <- input$arquivos$name[
+      match(t$Arquivo,
+            unique(t$Arquivo))
+    ]
+    t
   })
+  
 }
 
-# Inicializa o app Shiny
 shinyApp(ui = ui, server = server)

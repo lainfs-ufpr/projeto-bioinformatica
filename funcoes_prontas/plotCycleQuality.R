@@ -17,90 +17,117 @@ library(ggplot2)
 # Função para gerar gráfico interativo e estático
 # da qualidade do sequenciamento por ciclo 
 # Param -  qa_output: output da funcao qa()
-#          cor_linhas: cor para linhas principais do plot
-# Return - lista com plot interativo e plot estático
+# Param -  paleta_cores: cor para linhas principais do plot
+# Param -  nomes_arquivos: nomes originais dos arquivos de entrada
+# Return - lista_plots: lista nomeada com plot estático e plot interativo
 # -------------------------------------------
-
-plotCycleQuality <- function(qa_output) {
+plotCycleQuality <- function(qa_output, paleta_cores="viridis", nomes_arquivos) {
   
-  # Pegar qualidade por ciclo sem processamento
+  # Organiza dataframe
   df <- qa_output[["perCycle"]][["quality"]]
   
-  # Calcular mediana por lane e ciclo
-  df_median <- df %>%
+  df_mediana <- df %>%
     group_by(lane, Cycle) %>%
-    summarise(
-      Median = quantile(rep(Score, Count), 0.5),
-      .groups = "drop"
-    )
+    summarise(Median = quantile(rep(Score, Count), 0.5),
+              .groups = "drop")
   
-  # Montar plot interativo
-  x_max <- max(df_median$Cycle)
+  colnames(df_mediana) <- c("Arquivo", "Ciclo", "Mediana")
+  x_max <- max(df_mediana$Ciclo)
+  
+  # Ajusta nomes dos arquivos
+  df_mediana$Arquivo <- nomes_arquivos[
+    match(df_mediana$Arquivo,
+          unique(df_mediana$Arquivo))
+  ]
+  
+  # Gerar cores 
+  n_cores <- length(unique((df_mediana$Arquivo)))
+  cores_paleta <- viridis::viridis(n_cores, option = paleta_cores)
+  
+  # Separar cores em arquivos
+  arquivo_niveis <- unique(df_mediana$Arquivo)
+  cores <- setNames(cores_paleta, arquivo_niveis)
+  
+  # Monta plot interativo
   p_interativo <- plot_ly(
-    data = df_median,
-    x = ~Cycle,
-    y = ~Median,
-    split = ~lane, # Dividir linhas por 'lane'
+    data = df_mediana,
+    x = ~Ciclo,
+    y = ~Mediana,
+    split = ~Arquivo,
     type = 'scatter',
     mode = 'lines',
-    color = I("black"),
-    hoverinfo = 'text', # Informações que aparecem ao passar o mouse
-    text = ~paste("Amostra:", lane, # Texto exibido ao passar o mouse
-                  "<br>Ciclo:", Cycle,
-                  "<br>Score Mediano:", round(Median, 2))
+    color = ~Arquivo,  
+    colors = cores,  
+    hoverinfo = 'text',
+    text = ~paste("Amostra:", Arquivo,
+                  "<br>Ciclo:", Ciclo,
+                  "<br>Score Mediano:", round(Mediana, 2))
   ) %>% plotly::layout(
-    # Adicionar retângulos de fundo para indicar qualidade
     shapes = list(
-      # Faixa vermelha clara: qualidade ruim (0–20)
       list(type = "rect", x0 = 0, x1 = x_max, y0 = 0, y1 = 20,
-           fillcolor = "rgba(255, 0, 0, 0.1)",
-           line = list(width = 0), layer = "below"),
-      # Faixa amarela clara: qualidade intermediária (20–28)
+           fillcolor = "rgba(255, 0, 0, 0.05)", line = list(width = 0), layer = "below"),
       list(type = "rect", x0 = 0, x1 = x_max, y0 = 20, y1 = 28,
-           fillcolor = "rgba(255, 255, 0, 0.1)",
-           line = list(width = 0), layer = "below"),
-      # Faixa verde clara: boa qualidade (28–40)
+           fillcolor = "rgba(255, 255, 0, 0.05)", line = list(width = 0), layer = "below"),
       list(type = "rect", x0 = 0, x1 = x_max, y0 = 28, y1 = 40,
-           fillcolor = "rgba(0, 255, 0, 0.1)",
-           line = list(width = 0), layer = "below")
+           fillcolor = "rgba(0, 255, 0, 0.05)", line = list(width = 0), layer = "below")
     ),
-    title = "Qualidade das Sequências por Ciclo",
-    xaxis = list(title = "Ciclo"),
-    yaxis = list(title = "Score de Qualidade (Phred)", range = c(0, 42)),
-    showlegend = FALSE
+    plot_bgcolor = "white",  
+    paper_bgcolor = "white",  
+    title = list(
+      text = "Qualidade das Sequências por Ciclo",
+      font = list(
+        size = 16,
+        color = "black"
+      ),
+      xanchor = "left",
+      x = 0.07,
+      y = 0.98
+    ),
+    xaxis = list(
+      title = "Ciclo",
+      titlefont = list(
+        size = 14,
+        color = "black"
+      ),
+      showgrid = FALSE,      
+      zeroline = FALSE,   
+      showline = TRUE,
+      linecolor = "gray",      
+      linewidth = 1         
+    ),
+    yaxis = list(
+      title = "Score de Qualidade (Phred)",
+      titlefont = list(
+        size = 14,
+        color = "black"
+      ),
+      showgrid = FALSE,      
+      zeroline = FALSE,
+      showline = TRUE,
+      linecolor = "gray",    
+      linewidth = 1
+    ),
+    legend = list(
+      title = list(text = "Arquivo"),
+      font = list(
+        color = "black"  
+      ),
+      x = 1,        
+      y = 0.5,     
+      xanchor = "left", 
+      yanchor = "middle" 
+    )
   )
-
-  colnames(df_median) <- c("Arquivo", "Cycle", "Median")
   
-  # Montar paleta de cores
-  n <- length(unique(df_median$Arquivo))
-  cor_inicial <- "#000000"  # preto
-  cor_final <- "grey70"    # grey20
-  
-  # Criar função interpoladora de cores
-  paleta_preto_cinza <- col_numeric(
-    palette = c(cor_inicial, cor_final),
-    domain = c(1, n)
-  )
-  
-  # Gerar vetor de cores para n valores
-  cores <- paleta_preto_cinza(1:n)
-  
-  # Montar plot estático
-  p_estatico <- ggplot(df_median, aes(x = Cycle, y = Median, group = Arquivo)) +
-    
-    # Camada 1: Retângulos de fundo para indicar a qualidade
+  # Monta plot estático
+  p_estatico <- ggplot(df_mediana, aes(x = Ciclo, y = Mediana, group = Arquivo)) +
     geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 28, ymax = 42),
-              fill = "#d0f0d0", alpha = 0.02) + # Verde
+              fill = "#d0f0d0", alpha = 0.015) +
     geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 20, ymax = 28),
-              fill = "#f0f0d0", alpha = 0.02) + # Amarelo
+              fill = "#f0f0d0", alpha = 0.015) +
     geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = 20),
-              fill = "#f0d0d0", alpha = 0.02) +   # Vermelho
-    
-    # Camada 2: Linhas de qualidade para cada amostra
+              fill = "#f0d0d0", alpha = 0.015) +
     geom_line(aes(color = Arquivo), linewidth = 0.7, show.legend = TRUE) +
-    
-    # Camada 3: Títulos, legendas e tema visual
     labs(
       title = "Qualidade das Sequências por Ciclo",
       x = "Ciclo",
@@ -109,12 +136,15 @@ plotCycleQuality <- function(qa_output) {
     scale_y_continuous(limits = c(0, 42), expand = c(0, 0)) +
     scale_x_continuous(expand = c(0, 0)) +
     scale_color_manual(values = cores) +
-    theme(legend.position = "bottom",
+    theme(legend.position = "right",
+          legend.text = element_text(),
           panel.background = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.line = element_line(color = "grey"))
   
-  return(list(p_interativo=p_interativo, 
-              p_estatico=p_estatico))
+  # Retorna lista com os dois gráficos (estático e interativo)
+  lista_plots <- list(p_interativo = p_interativo, p_estatico = p_estatico)
+  
+  return(lista_plots)
 }

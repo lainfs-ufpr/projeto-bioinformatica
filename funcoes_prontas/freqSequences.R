@@ -24,11 +24,11 @@ freqSequences <- function(qa_output, n_frequentes = 20) {
   
   # Contagens de todos os arquivos
   all_counts <- qa_output[["readCounts"]]
-  
+
   # Sequências frequentes (de todos os arquivos) com frequencia > 1
   df <- qa_output[["frequentSequences"]] %>%
           filter(count > 1)
-  
+
   resultados <- list()
   # Itera sobre os arquivos (ou lanes)
   for (lane_name in rownames(all_counts)) {
@@ -47,13 +47,12 @@ freqSequences <- function(qa_output, n_frequentes = 20) {
       resultados[[lane_name]] <- data.frame(
         Sequência = NA,
         Frequência = NA,
-        Adaptador = "Sem sequências com >1 ocorrência",
+        Adaptador = "Sem seqs com freq > 1",
         Arquivo = lane_name,
         stringsAsFactors = FALSE
       )
       next
     }
-    
     # Seleciona as mais frequentes
     top_df <- head(df_filtrada[order(df_filtrada$count, decreasing = TRUE),
                                c("sequence", "count")],
@@ -70,23 +69,22 @@ freqSequences <- function(qa_output, n_frequentes = 20) {
     })
     
     # Adiciona coluna do nome do arquivo (ou lane)
-    top_df$arquivo <- lane_name
+    top_df$Arquivo <- lane_name
+    colnames(top_df) <- c("Sequência", "Frequência", "Adaptador", "Arquivo")
     
     # Adiciona aos resultados
     resultados[[lane_name]] <- top_df
+    
   }
-  
+
   # Junta tudo em uma única tabela
   df_final <- do.call(rbind, resultados)
   
-  # Organiza colunas e nomes
-  colnames(df_final) <- c("Sequência", "Frequência", "Adaptador", "Arquivo")
+  # Organiza nomes
   rownames(df_final) <- NULL
-  
+
   # Reordena colunas para deixar "Arquivo" primeiro
   df_final <- df_final[, c("Arquivo", "Sequência", "Frequência", "Adaptador")]
-  
-  # Remove repetições visuais do nome do arquivo mesclando
   df_final$Arquivo <- as.character(df_final$Arquivo)
 
   return(df_final)

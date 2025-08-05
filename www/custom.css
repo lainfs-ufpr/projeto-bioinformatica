@@ -1,0 +1,112 @@
+
+@font-face {
+  font-family: 'Phenomena';
+  src: url('Phenomena-ExtraBold.otf') format('opentype');
+  font-weight: bold;
+}
+
+body {
+  font-family: 'Lexend Deca', sans-serif;
+}
+
+h1, h2, h3, .titulo-app {
+  font-family: 'Phenomena', sans-serif;
+  font-weight: bold;
+}
+
+/*Titulo*/
+.titulo-app {
+  color: #31231a;
+  text-align: center;
+  margin-bottom: 20px;
+}
+#palette_choice-label {
+  color: #FFFFFF; /* Cor do texto do label */
+  font-weight: bold; 
+}
+
+/*sidebar*/
+.sidebar-custom {
+    background-color: #940e01;
+    border-radius: 18px;
+    padding: 20px;
+    align-items: center;
+}
+
+.titulo-sidebar{
+    text-align: center; 
+    color: #f0ffff; 
+    margin-bottom: 20px;"),
+}
+
+/*botão de input de arquivo*/  
+.file-input-custom .btn {
+    background: #0e432f;
+    color: #f0ffff;
+    border-radius: 18px;
+    border: none;
+}
+
+/*Botão de input de pasta*/  
+#diretorio {
+    background: #0e432f;
+    color: #f0ffff;
+    border-radius: 18px;
+}
+  
+/*Botão para rodar o controle de qualidade*/
+.btnQA-custom {
+    background-color: #0e432f;
+    color: #f0ffff;
+    text-align: center; 
+    border-radius: 20px;
+    border: none;
+    transition: 0.1s;
+}
+  
+/*Botão para rodar o QC ao passar o mouse por cima*/
+.btnQA-custom:hover {
+    background-color: #1a754f;
+    color: #f0ffff;
+}
+
+/*Titulo dos plots*/
+.titulo-plots{
+    color: #0e432f;
+    margin-bottom: 20px;
+}
+
+
+/*Animação de 'carregando' ao rodar o QC*/
+.loading-spinner {
+    border: 5px solid #f0ffff;
+    border-top: 5px solid #1a754f;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 10px auto;
+}
+
+/*Config da animação*/
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#qa_output {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f0ffff;
+    padding: 10px;
+    text-align: center;
+    border-top: 1px solid #865F46;
+    z-index: 9999;
+    font-weight: bold;
+}
+
+table {
+    font-size: 10px;
+}

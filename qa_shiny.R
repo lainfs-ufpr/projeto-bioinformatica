@@ -34,64 +34,61 @@ ui <- fluidPage(
   # Procura o arquivo css na pasta www do diretório onde está rodando
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
   
-  #tags$h1("Controle de Qualidade de Sequências FASTQ", class = "titulo-app"),
-  
-  tags$div(
-    tags$img(src = "logo-principal.png", id = "logo-fixo"),
-    style = "position: fixed; bottom: 20px; left: 10px; z-index: 999;"
-  ),
-  
-  
   
   page_navbar(
     input_dark_mode(id = "mode"), 
     textOutput("mode"),
 
     title = 
-      tags$span("Controle de Qualidade de Sequências FASTQ", class = "titulo-app"),
+      tags$span(
+        tags$img(src = "logo-principal.png", id = "logo-fixo",
+                 style = "height:80px; margin-right:10px; vertical-align:middle;"), 
+        "Controle de Qualidade de Sequências FASTQ", 
+        class = "titulo-app"),
     id = "page",
  
   nav_panel(
     "Análise",
     
   sidebarLayout(
-    sidebarPanel(
+    sidebarPanel(width = 3,
       class = "sidebar-custom",
       
       tags$h4("Para inicializar a análise, selecione o(s) arquivo(s) ou uma pasta", 
               class = "titulo-sidebar"),
       
       div(
-        style = "display:flex; gap: 10px; margin-bottom: 20px; align-items: flex-start;", #ta com flex-start mas adicionar uma pasta nao esta alinhado com botao de input, esta alinhando com o texto
+        style = "display:flex; flex-direction:column; gap:15px; margin-bottom:20px;",
         
-     #   div(class = "botao-diretorio",
-     #   shinyDirButton("diretorio", "Adicionar uma pasta", "Selecionar")
-      #  ),
+        # linha com os dois botões lado a lado
+        div(
+          style = "display:flex; gap:15px; align-items:flex-center;",
+          
+          # Botão de pasta
+          shinyDirButton(class = "botao-diretorio",
+                         "diretorio", "Adicionar uma pasta", "Selecionar"), 
+
+          
+          # Botão de arquivo
+          div(
+            style = "display:flex; flex-direction:column;",
+            tags$span("Adicionar um arquivo", class = "message-input"),
+            div(class = "botao-arquivo",
+              fileInput("arquivos", 
+                        label = NULL, 
+                        multiple = TRUE,
+                        accept = c(".fasta", ".fa", ".fastq", ".fq", "text/plain"))
+            ),
+          )
+        ),
         
+        # Botão de rodar QA embaixo
+        div(id = "loading_animation", class = "loading-spinner", style = "display: none;"),
         
-        shinyDirButton("diretorio", "Adicionar uma pasta", "Selecionar"),
-        
-        #mais uma div para empilhar os botoes de input com o de rodar qualidade
-        div(style = "display:flex; flex-direction:column; gap:10px;",
-            
-        tags$span("Adicionar um arquivo",class = "message-input"),
-        div(class = "file-input-custom", 
-            fileInput("arquivos",label = NULL , multiple = TRUE,
-                      accept = c(".fasta", ".fa", ".fastq", ".fq", "text/plain"))),
-        
-      
-      
-      div(id = "loading_animation", class = "loading-spinner",
-         style = "display: none;"),
-      
-      # Botão iniciar QA
-      
-        actionButton("run_analysis", "Rodar controle de qualidade",
+        actionButton("run_analysis", "Rodar controle de qualidade", 
                      class = "btnQA-custom")
-        )
       ),
-      # Aumentar espaço
-      tags$br(),
+
       tags$br(),
       
       selectInput("palette_choice", "Mude a paleta de cores aqui:",
@@ -102,7 +99,7 @@ ui <- fluidPage(
     
     
     # Paineis de gráficos
-    mainPanel(
+    mainPanel(width = 9,
       navset_pill(
         nav_panel("Qualidade por Ciclo",
                  class = "titulo-plots",
@@ -184,7 +181,7 @@ server <- function(input, output, session) {
     shinyjs::hide("run_analysis")
     shinyjs::show("loading_animation")
     shinyjs::html("qa_output",
-                  '<b style="color: #31231a">Controle de Qualidade em andamento...</b>')
+                  '<b style="color: black;">Controle de Qualidade em andamento...</b>')
     
     fls <- if (!is.null(input$arquivos)) {
       input$arquivos$datapath

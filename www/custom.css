@@ -16,14 +16,27 @@ h1, h2, h3, .titulo-app {
 
 /*Titulo*/
 .titulo-app {
-  color: #31231a;
+  color: #f0ffff; /* alterei para branco caso use a nav bar colorida*/
   text-align: center;
   margin-bottom: 20px;
+  font-size: 30px;
 }
+
 #palette_choice-label {
   color: #FFFFFF; /* Cor do texto do label */
   font-weight: bold; 
 }
+
+#logo-fixo {
+  height: 120px;
+  opacity: 0.9;
+  transition: 0.3s;
+}
+
+#logo-fixo:hover {
+  opacity: 1;
+}
+
 
 /*sidebar*/
 .sidebar-custom {
@@ -31,27 +44,56 @@ h1, h2, h3, .titulo-app {
     border-radius: 18px;
     padding: 20px;
     align-items: center;
+    margin-bottom: 20px;
 }
 
 .titulo-sidebar{
     text-align: center; 
     color: #f0ffff; 
-    margin-bottom: 20px;"),
+    margin-bottom: 20px;
 }
+
+.message-input{
+  font-weight: bold: 
+  font-size: 12px;
+  color: #f0ffff;
+}
+  
+}
+
 
 /*botão de input de arquivo*/  
 .file-input-custom .btn {
-    background: #0e432f;
+    background: #878787; /*testando outra color*/
     color: #f0ffff;
     border-radius: 18px;
     border: none;
 }
 
-/*Botão de input de pasta*/  
+/*Botão de input de pasta*/ 
+/*
 #diretorio {
     background: #0e432f;
     color: #f0ffff;
     border-radius: 18px;
+}*/
+
+/*para poder alinhar com o text input */
+.botao-diretorio{
+    background: #0e432f;
+    color: #f0ffff;
+    text-align: center; 
+    border-radius: 20px;
+    border: none;
+    transition: 0.1s;
+}
+
+.botao-diretorio:hover{
+    background-color: #0e432f;
+    color: #f0ffff;
+    
+}
+  
 }
   
 /*Botão para rodar o controle de qualidade*/

@@ -9,6 +9,7 @@ library(ggplot2)
 library(fs)
 library(scales)  
 
+
 # Carregar pacotes
 
 source("funcoes_prontas/plotAdapterContamination.R")
@@ -24,6 +25,7 @@ options(shiny.maxRequestSize = 100 * 1024^3)
 
 # Front end
 ui <- fluidPage(
+  
   theme = bs_theme(version = 5, bg = "#FFFFFF", fg = "#31231a", 
                    bootswatch = "flatly", primary = "#1a754f", 
                    base_font = font_google("Lexend Deca")),
@@ -32,8 +34,26 @@ ui <- fluidPage(
   # Procura o arquivo css na pasta www do diretório onde está rodando
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
   
-  tags$h1("Controle de Qualidade de Sequências FASTQ", class = "titulo-app"),
+  #tags$h1("Controle de Qualidade de Sequências FASTQ", class = "titulo-app"),
   
+  tags$div(
+    tags$img(src = "logo-principal.png", id = "logo-fixo"),
+    style = "position: fixed; bottom: 20px; left: 10px; z-index: 999;"
+  ),
+  
+  
+  
+  page_navbar(
+    input_dark_mode(id = "mode"), 
+    textOutput("mode"),
+
+    title = 
+      tags$span("Controle de Qualidade de Sequências FASTQ", class = "titulo-app"),
+    id = "page",
+ 
+  nav_panel(
+    "Análise",
+    
   sidebarLayout(
     sidebarPanel(
       class = "sidebar-custom",
@@ -42,25 +62,34 @@ ui <- fluidPage(
               class = "titulo-sidebar"),
       
       div(
+        style = "display:flex; gap: 10px; margin-bottom: 20px; align-items: flex-start;", #ta com flex-start mas adicionar uma pasta nao esta alinhado com botao de input, esta alinhando com o texto
+        
+     #   div(class = "botao-diretorio",
+     #   shinyDirButton("diretorio", "Adicionar uma pasta", "Selecionar")
+      #  ),
+        
+        
         shinyDirButton("diretorio", "Adicionar uma pasta", "Selecionar"),
+        
+        #mais uma div para empilhar os botoes de input com o de rodar qualidade
+        div(style = "display:flex; flex-direction:column; gap:10px;",
+            
+        tags$span("Adicionar um arquivo",class = "message-input"),
         div(class = "file-input-custom", 
-            fileInput("arquivos", "Adicionar um arquivo", multiple = TRUE,
+            fileInput("arquivos",label = NULL , multiple = TRUE,
                       accept = c(".fasta", ".fa", ".fastq", ".fq", "text/plain"))),
-        style = "text-align: center;
-                  color: #f0ffff;
-                  display: flex; 
-                  gap: 10px; 
-                  margin-bottom: 20px;"
-      ),
+        
+      
       
       div(id = "loading_animation", class = "loading-spinner",
-          style = "display: none;"),
+         style = "display: none;"),
       
       # Botão iniciar QA
-      div(style = "text-align: center;",
+      
         actionButton("run_analysis", "Rodar controle de qualidade",
-                     class = "btnQA-custom")),
-     
+                     class = "btnQA-custom")
+        )
+      ),
       # Aumentar espaço
       tags$br(),
       tags$br(),
@@ -71,43 +100,52 @@ ui <- fluidPage(
                   selected = "viridis")
     ),
     
+    
     # Paineis de gráficos
     mainPanel(
-      tabsetPanel(
-        tabPanel("Qualidade por Ciclo",
+      navset_pill(
+        nav_panel("Qualidade por Ciclo",
                  class = "titulo-plots",
                  plotOutput("plot_qualidade_ciclo_est"),
-                 downloadButton("download_plot_ciclo", "Baixar gráfico")),
-        tabPanel("Qualidade Média",
+                 shinyjs::hidden(
+                 downloadButton("download_plot_ciclo", "Baixar gráfico"))),
+        nav_panel("Qualidade Média",
                  class = "titulo-plots",
                  plotOutput("plot_qualidade_media_est"),
-                 downloadButton("download_plot_media", "Baixar gráfico")),
-        tabPanel("Contagem de Bases",
+                 shinyjs::hidden(
+                 downloadButton("download_plot_media", "Baixar gráfico"))),
+        nav_panel("Contagem de Bases",
                  class = "titulo-plots",
                  plotOutput("plot_contagens_est"),
-                 downloadButton("download_plot_contagens", "Baixar gráfico")),
-        tabPanel("Distribuição Cumulativa de Leituras",
+                 shinyjs::hidden(
+                 downloadButton("download_plot_contagens", "Baixar gráfico"))),
+        nav_panel("Distribuição Cumulativa de Leituras",
                  class = "titulo-plots",
                  plotOutput("plot_ocorrencias_est"),
-                 downloadButton("download_plot_ocorrencias", "Baixar gráfico")),
-        tabPanel("Sequências Frequentes",
+                 shinyjs::hidden(
+                 downloadButton("download_plot_ocorrencias", "Baixar gráfico"))),
+        nav_panel("Sequências Frequentes",
                  class = "titulo-plots",
                  tableOutput("tabela_frequencias")),
-        tabPanel("Contaminação por Adaptadores",
+        nav_panel("Contaminação por Adaptadores",
                  class = "titulo-plots",
                  plotOutput("plot_adapters_est"),
-                 downloadButton("download_plot_adapters", "Baixar gráfico"),
-                 tableOutput("tabela_adapters"))
+                 shinyjs::hidden(
+                 downloadButton("download_plot_adapters", "Baixar gráfico")),
+                 tableOutput("tabela_adapters")),
       ),
       br(), hr(),
-      div(id = "qa_output")
-    )
-  ),
+      div(id = "qa_output"),
   
   div(style = "margin-left: 20px;",
-      textOutput("caminhoPasta") 
+      textOutput("caminhoPasta"))
+      )
+    )
+  )
   )
 )
+  
+
 
 # Backend - servidor
 server <- function(input, output, session) {
@@ -170,6 +208,13 @@ server <- function(input, output, session) {
       tempo_inicio <- Sys.time()
       resultado <- qa(fls, type = "fastq")
       resultado_qa(resultado)
+      
+      shinyjs::show("download_plot_ciclo")
+      shinyjs::show("download_plot_media")
+      shinyjs::show("download_plot_contagens")
+      shinyjs::show("download_plot_adapters")
+      shinyjs::show("download_plot_ocorrencias")
+      
       
       tempo_execucao <- Sys.time() - tempo_inicio
       shinyjs::html("qa_output",

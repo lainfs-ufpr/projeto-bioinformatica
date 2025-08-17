@@ -9,3 +9,4 @@ instalar_pacotes <- function(pkgs, installer) {
     }
   }
 }
+

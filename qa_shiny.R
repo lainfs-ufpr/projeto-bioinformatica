@@ -36,19 +36,16 @@ ui <- fluidPage(
   
   
   page_navbar(
-    input_dark_mode(id = "mode"), 
-    textOutput("mode"),
-
-    title = 
-      tags$span(
-        tags$img(src = "logo-principal.png", id = "logo-fixo",
-                 style = "height:80px; margin-right:10px; vertical-align:middle;"), 
-        "Controle de Qualidade de Sequências FASTQ", 
-        class = "titulo-app"),
+    title = tags$span(tags$img(src = "logo-principal.png", id = "logo-fixo",
+                      style = "height:80px; margin-right:10px; vertical-align:middle;"), 
+                      "Controle de Qualidade de Sequências FASTQ", 
+                      class = "titulo-app"),
+    nav_panel("Qualidade"),
+    
+    nav_spacer(),
+    nav_item(input_dark_mode(id = "mode", value = FALSE)), 
+    
     id = "page",
- 
-  nav_panel(
-    "Análise",
     
   sidebarLayout(
     sidebarPanel(width = 3,
@@ -138,7 +135,6 @@ ui <- fluidPage(
       textOutput("caminhoPasta"))
       )
     )
-  )
   )
 )
   

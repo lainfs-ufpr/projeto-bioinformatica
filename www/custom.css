@@ -83,6 +83,7 @@ h1, h2, h3, .titulo-app {
   display: none;
 }
 
+/*Botão de seleção de pasta*/
 .botao-diretorio{
     background-color: #0e432f;
     color: #f0ffff;
@@ -96,7 +97,22 @@ h1, h2, h3, .titulo-app {
     color: #f0ffff;
     
 }
-  
+
+/*Botão de paleta de cores*/
+.botao-cor{
+    background-color: #0e432f;
+    color: #f0ffff;
+    border-radius: 20px;
+    border: none;
+    transition: 0.1s;
+}
+
+.botao-cor:hover{
+    background-color: #1a754f;
+    color: #f0ffff;
+    
+}
+ 
 /*Botão para rodar o controle de qualidade*/
 .btnQA-custom {
     background-color: #0e432f;

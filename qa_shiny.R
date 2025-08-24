@@ -4,6 +4,7 @@ library(bslib)
 library(shiny)
 library(shinyjs)
 library(shinyFiles)
+library(shinyWidgets) #botão de download, precisa fazer o download dessa biblioteca e do svglite (para baixar svg)
 library(ShortRead)
 library(ggplot2)
 library(fs)
@@ -88,33 +89,118 @@ ui <- fluidPage(
                     navset_pill(nav_panel("Qualidade por Ciclo",
                                           class = "titulo-plots",
                                           plotOutput("plot_qualidade_ciclo_est"),
-                                          shinyjs::hidden(div(id = "download_area_ciclo",
-                                                            selectInput("formato_download_ciclo",
-                                                                      "Escolha o formato:",
-                                                                      choices = c("png", "pdf", "jpeg", "svg"),
-                                                                      selected = "png"
-                                                                      ),
-                                                            downloadButton("download_plot_ciclo", "Baixar gráfico")))),
+                                          
+                                          shinyjs::hidden(
+                                            div(id = "download_plot_ciclo",
+                                                dropdownButton(
+                                                  inputId = "download_opts_ciclo",
+                                                  label = "Baixar gráfico", 
+                                                  icon = icon("download"),
+                                                  status = "primary",
+                                                  circle = FALSE,
+                                                  inline = TRUE,
+                                            
+                                                selectInput("formato_download_ciclo", "Formato:",
+                                                          choices = c("png", "pdf", "jpeg", "svg"),
+                                                          selected = "pdf"),
+                                                downloadButton("download_plot_ciclo", "Download")
+                                              )
+                                            )
+                                          )
+                                ),
                                 nav_panel("Qualidade Média",
                                           class = "titulo-plots",
                                           plotOutput("plot_qualidade_media_est"),
-                                          shinyjs::hidden(downloadButton("download_plot_media", "Baixar gráfico"))),
+                                          
+                                          
+                                          shinyjs::hidden(
+                                            div(id = "download_plot_media",
+                                                dropdownButton(
+                                                  inputId = "download_opts_media",
+                                                  label = "Baixar gráfico", 
+                                                  icon = icon("download"),
+                                                  status = "primary",
+                                                  circle = FALSE,
+                                                  inline = TRUE,
+                                                  
+                                                  selectInput("formato_download_media", "Formato:",
+                                                              choices = c("png", "pdf", "jpeg", "svg"),
+                                                              selected = "pdf"),
+                                                  downloadButton("download_plot_media", "Download")
+                                                )
+                                            )
+                                          )
+                                ),
                                 nav_panel("Contagem de Bases",
                                           class = "titulo-plots",
                                           plotOutput("plot_contagens_est"),
-                                          shinyjs::hidden(downloadButton("download_plot_contagens", "Baixar gráfico"))),
+                                          
+                                          shinyjs::hidden(
+                                            div(id = "download_plot_contagens",
+                                                dropdownButton(
+                                                  inputId = "download_opts_contagens",
+                                                  label = "Baixar gráfico", 
+                                                  icon = icon("download"),
+                                                  status = "primary",
+                                                  circle = FALSE,
+                                                  inline = TRUE,
+                                                  
+                                                  selectInput("formato_download_contagens", "Formato:",
+                                                              choices = c("png", "pdf", "jpeg", "svg"),
+                                                              selected = "pdf"),
+                                                  downloadButton("download_plot_contagens", "Download")
+                                                )
+                                            )
+                                          )
+                                ),
                                 nav_panel("Distribuição Cumulativa de Leituras",
                                           class = "titulo-plots",
                                           plotOutput("plot_ocorrencias_est"),
-                                          shinyjs::hidden(downloadButton("download_plot_ocorrencias", "Baixar gráfico"))),
+                                          
+                                          shinyjs::hidden(
+                                            div(id = "download_plot_ocorrencias",
+                                                dropdownButton(
+                                                  inputId = "download_opts_ocorrencias",
+                                                  label = "Baixar gráfico", 
+                                                  icon = icon("download"),
+                                                  status = "primary",
+                                                  circle = FALSE,
+                                                  inline = TRUE,
+                                                  
+                                                  selectInput("formato_download_ocorrencias", "Formato:",
+                                                              choices = c("png", "pdf", "jpeg", "svg"),
+                                                              selected = "pdf"),
+                                                  downloadButton("download_plot_ocorrencias", "Download")
+                                                )
+                                            )
+                                          )
+                                ),
                                 nav_panel("Sequências Frequentes",
                                           class = "titulo-plots",
                                           tableOutput("tabela_frequencias")),
                                 nav_panel("Contaminação por Adaptadores",
                                           class = "titulo-plots",
                                           plotOutput("plot_adapters_est"),
-                                          shinyjs::hidden(downloadButton("download_plot_adapters", "Baixar gráfico")),
-                                          tableOutput("tabela_adapters")),
+                                          
+                                          shinyjs::hidden(
+                                            div(id = "download_plot_adapters",
+                                                dropdownButton(
+                                                  inputId = "download_opts_adapters",
+                                                  label = "Baixar gráfico", 
+                                                  icon = icon("download"),
+                                                  status = "primary",
+                                                  circle = FALSE,
+                                                  inline = TRUE,
+                                                  
+                                                  selectInput("formato_download_adaptersP", "Formato:",
+                                                              choices = c("png", "pdf", "jpeg", "svg"),
+                                                              selected = "pdf"),
+                                                  downloadButton("download_plot_adapters", "Download")
+                                                )
+                                            )
+                                          ),
+                                          tableOutput("tabela_adapters")
+                                ),
                     ),
                     br(),
                     hr(),
@@ -186,11 +272,11 @@ server <- function(input, output, session) {
                   resultado <- qa(fls, type = "fastq")
                   resultado_qa(resultado)
       
-                  shinyjs::show("download_area_ciclo")
+                  shinyjs::show("download_plot_ciclo")
                   shinyjs::show("download_plot_media")
                   shinyjs::show("download_plot_contagens")
-                  shinyjs::show("download_plot_adapters")
                   shinyjs::show("download_plot_ocorrencias")
+                  shinyjs::show("download_plot_adapters")
       
                   tempo_execucao <- Sys.time() - tempo_inicio
                   shinyjs::html("qa_output",
@@ -228,18 +314,24 @@ server <- function(input, output, session) {
                                                 plotCycleQuality(resultado_qa(), paleta_cores(), nomes_arquivos())$p_interativo
   })
   
-  output$download_plot_ciclo <- downloadHandler(filename = function() {
-                                                paste0("qualidade_ciclo.", input$formato_download_ciclo)},
-                                content = function(file) {
+  output$download_plot_ciclo <- downloadHandler(
+                                  filename = function() {
+                                                paste0("qualidade_ciclo.", input$formato_download_ciclo)
+                                  },
+                                  content = function(file) {
                                               req(resultado_qa(), paleta_cores(), input$formato_download_ciclo)
-                                              p <- plotCycleQuality(resultado_qa(),
-                                                                    paleta_cores(),
-                                                                    nomes_arquivos()
+                                              
+                                              p <- plotCycleQuality(
+                                                      resultado_qa(),
+                                                      paleta_cores(),
+                                                      nomes_arquivos()
                                               )$p_estatico
-                                              ggsave(filename = file,
-                                                    plot = p,
-                                                    width = 8, height = 6,
-                                                    device = input$formato_download_ciclo   # <- chave!
+                                              
+                                              ggsave(
+                                                filename = file,
+                                                plot = p,
+                                                width = 8, height = 6,
+                                                device = input$formato_download_ciclo
                                               )
                                 }
   )
@@ -253,14 +345,26 @@ server <- function(input, output, session) {
                                                 readQualityScore(resultado_qa(), paleta_cores(), nomes_arquivos())$p_interativo
   })
   
-  output$download_plot_media <- downloadHandler(filename = function() { "qualidade_media.png" },
-                                                content = function(file) {
-                                                              req(resultado_qa())
-                                                              p <- readQualityScore(resultado_qa(), 
-                                                                                    paleta_cores(), 
-                                                                                    nomes_arquivos())$p_estatico
-                                                              ggsave(file, p,width = 8, height = 6)
-                                                }
+  output$download_plot_media <- downloadHandler(
+                                  filename = function() {
+                                                paste0("media.", input$formato_download_media)
+                                  },
+                                  content = function(file) {
+                                              req(resultado_qa(), paleta_cores(), input$formato_download_media)
+      
+                                              p <- readQualityScore(
+                                                      resultado_qa(),
+                                                      paleta_cores(),
+                                                      nomes_arquivos()
+                                              )$p_estatico
+      
+                                              ggsave(
+                                                filename = file,
+                                                plot = p,
+                                                width = 8, height = 6,
+                                                device = input$formato_download_media
+                                              )
+                                  }
   )
   
   #Plot contagem bases
@@ -284,17 +388,27 @@ server <- function(input, output, session) {
                                                               nomes_arquivos())$p_interativo
   })
 
-  output$download_plot_contagens <- downloadHandler(filename = function() { "contagem_bases.png" },
-                                    content = function(file) {fls <- if (!is.null(input$arquivos)) {
-                                                                        input$arquivos$datapath
-                                                                    } else if (!is.null(dir_path())) {
-                                                                        dir(dir_path(), pattern = "*fq$", full.names = TRUE)
-                                                                    } else {NULL}
-                                                              req(fls)
-                                                              p <- plotNucleotideCount(fls, paleta_cores(), 
-                                                                                       nomes_arquivos())$p_estatico
-                                                              ggsave(file, p, width = 8, height = 6)
-  })
+  output$download_plot_contagens <- downloadHandler(
+                                      filename = function() {
+                                        paste0("contagens.", input$formato_download_contagens)
+                                      },
+                                      content = function(file) {
+                                                  req(resultado_qa(), paleta_cores(), input$formato_download_contagens)
+      
+                                                  p <- plotNucleotideCount(
+                                                          resultado_qa(),
+                                                          paleta_cores(),
+                                                          nomes_arquivos()
+                                                  )$p_estatico
+      
+                                                  ggsave(
+                                                    filename = file,
+                                                    plot = p,
+                                                    width = 8, height = 6,
+                                                    device = input$formato_download_contagens
+                                                  )
+                                    }
+  )
   
   #Plot adapters
   output$plot_adapters_est <- renderPlot({fls <- if (!is.null(input$arquivos)) {
@@ -315,16 +429,27 @@ server <- function(input, output, session) {
                                           plotAdapterContamination(fls, paleta_cores())$p_interativo
   })
   
-  output$download_plot_adapters <- downloadHandler(filename = function() { "contaminacao_adaptadores.png" },
-                                   content = function(file) {fls <- if (!is.null(input$arquivos)) {
-                                                                        input$arquivos$datapath
-                                                                    } else if (!is.null(dir_path())) {
-                                                                        dir(dir_path(), pattern = "*fq$", full.names = TRUE)
-                                                                    } else {NULL}
-                                                            req(fls)
-                                                            p <- plotAdapterContamination(fls, paleta_cores())$p_estatico
-                                                            ggsave(file, p, width = 8, height = 6)
-  })
+  output$download_plot_adapters <- downloadHandler(
+                                      filename = function() {
+                                        paste0("adapters_Plot.", input$formato_download_adaptersP)
+                                      },
+                                      content = function(file) {
+                                                  req(resultado_qa(), paleta_cores(), input$formato_download_adaptersP)
+      
+                                                  p <- plotAdapterContamination(
+                                                          resultado_qa(),
+                                                          paleta_cores(),
+                                                          nomes_arquivos()
+                                                  )$p_estatico
+      
+                                                  ggsave(
+                                                    filename = file,
+                                                    plot = p,
+                                                    width = 8, height = 6,
+                                                    device = input$formato_download_adaptersP
+                                                  )
+                                      }
+  )
   
   #Plot ocorrencias
   output$plot_ocorrencias_est <- renderPlot({req(resultado_qa())
@@ -339,13 +464,27 @@ server <- function(input, output, session) {
                                                  nomes_arquivos())$p_interativo
   })
   
-  output$download_plot_ocorrencias <- downloadHandler(filename = function() { "distribuicao_ocorrencias.png" },
-                                      content = function(file) {req(resultado_qa())
-                                                                plotOcurrences(resultado_qa(), 
-                                                                               paleta_cores(), 
-                                                                               nomes_arquivos())$p_estatico
-                                                                ggsave(file, p, width = 8, height = 6)
-  })
+  output$download_plot_ocorrencias <- downloadHandler(
+                                        filename = function() {
+                                          paste0("ocorrencias.", input$formato_download_ocorrencias)
+                                        },
+                                        content = function(file) {
+                                                    req(resultado_qa(), paleta_cores(), input$formato_download_ocorrencias)
+      
+                                                    p <- plotOcurrences(
+                                                            resultado_qa(),
+                                                            paleta_cores(),
+                                                            nomes_arquivos()
+                                                    )$p_estatico
+      
+                                                    ggsave(
+                                                      filename = file,
+                                                      plot = p,
+                                                      width = 8, height = 6,
+                                                      device = input$formato_download_ocorrencias
+                                                    )
+                                        }
+  )
 
   #Tabela sequencias frequentes
   output$tabela_frequencias <- renderTable({req(resultado_qa())
@@ -358,16 +497,19 @@ server <- function(input, output, session) {
   
   #Tabela adapters
   output$tabela_adapters <- renderTable({fls <- if (!is.null(input$arquivos)) {
-                                                    input$arquivos$datapath
-                                                } else if (!is.null(dir_path())) {
-                                                    dir(dir_path(), pattern = "*fq$", full.names = TRUE)
-                                                } else {NULL}
-                                        req(fls)
-                                        t <- tableAdapterContamination(fls)
-                                        t$Arquivo <- input$arquivos$name[match(t$Arquivo,unique(t$Arquivo))]
-                                        t
+                                                  input$arquivos$datapath
+                                                }else if (!is.null(dir_path())) {
+                                                  dir(dir_path(), pattern = "*fq$", full.names = TRUE)
+                                                }else {NULL}
+                                                
+                                                req(fls)
+                                                t <- tableAdapterContamination(fls)
+                                                t$Arquivo <- input$arquivos$name[
+                                                                match(
+                                                                  t$Arquivo,unique(t$Arquivo))]
+                                                t
   })
-  
+
 }
 
 shinyApp(ui = ui, server = server)

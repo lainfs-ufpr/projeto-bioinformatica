@@ -1,7 +1,7 @@
 # -------------------------------------------
 # Carregamento das Bibliotecas
 # -------------------------------------------
-source("instalar_pacotes.R")
+source("scripts/instalar_pacotes.R")
 bioc_pkgs <- c("ShortRead", "Biostrings")
 
 instalar_pacotes(bioc_pkgs, BiocManager::install)

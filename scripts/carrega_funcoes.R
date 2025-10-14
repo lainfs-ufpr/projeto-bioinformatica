@@ -1,0 +1,7 @@
+source("scripts/funcoes_prontas/plotAdapterContamination.R")
+source("scripts/funcoes_prontas/tableAdapterContamination.R")
+source("scripts/funcoes_prontas/freqSequences.R")
+source("scripts/funcoes_prontas/plotCycleQuality.R")
+source("scripts/funcoes_prontas/plotNucleotideCount.R")
+source("scripts/funcoes_prontas/readQualityScore.R")
+source("scripts/funcoes_prontas/plotOcurrences.R")

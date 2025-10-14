@@ -12,14 +12,8 @@ library(scales)
 library(plotly)
 library(viridis)
 
-# Carregar pacotes
-source("funcoes_prontas/plotAdapterContamination.R")
-source("funcoes_prontas/tableAdapterContamination.R")
-source("funcoes_prontas/freqSequences.R")
-source("funcoes_prontas/plotCycleQuality.R")
-source("funcoes_prontas/plotNucleotideCount.R")
-source("funcoes_prontas/readQualityScore.R")
-source("funcoes_prontas/plotOcurrences.R")
+# Carregar funções prontas
+source("scripts/carrega_funcoes.R")
 
 # Tamanho máximo de input
 options(shiny.maxRequestSize = 100 * 1024^3)

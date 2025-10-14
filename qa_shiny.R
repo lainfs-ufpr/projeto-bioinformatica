@@ -211,8 +211,6 @@ ui <- fluidPage(
       )
   )
 )
-  
-
 
 #Backend - servidor
 server <- function(input, output, session) {

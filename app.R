@@ -1,10 +1,6 @@
 library(shiny)
-library(bslib)
-library(shinyjs)
-library(shinyFiles)
 # botão de download, precisa fazer o download 
 # dessa biblioteca e do svglite (para baixar svg)
-library(shinyWidgets)
 library(ShortRead)
 library(ggplot2)
 library(fs)

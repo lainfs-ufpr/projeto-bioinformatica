@@ -1,3 +1,7 @@
+library(bslib)
+library(shinyjs)
+library(shinyFiles)
+library(shinyWidgets)
 #Front
 ui <- fluidPage(
   

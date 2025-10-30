@@ -1,11 +1,21 @@
-#Backend - servidor
+library(ShortRead)
+
+source("scripts/funcoes_prontas/plotAdapterContamination.R")
+source("scripts/funcoes_prontas/tableAdapterContamination.R")
+source("scripts/funcoes_prontas/freqSequences.R")
+source("scripts/funcoes_prontas/plotCycleQuality.R")
+source("scripts/funcoes_prontas/plotNucleotideCount.R")
+source("scripts/funcoes_prontas/readQualityScore.R")
+source("scripts/funcoes_prontas/plotOcurrences.R")
+
+# BACK
 server <- function(input, output, session) {
   
-  #Usa o conteudo html de um arquivo separado
+  # Usa o conteudo html de um arquivo separado
   html_content <- HTML(paste(readLines("www/apresentacao.html",
                                        encoding = "UTF-8"), collapse = "\n"))
   
-  #Cria uma tela inicial como se fosse uma caixa de dialogo
+  # Cria uma tela inicial como se fosse uma caixa de dialogo
   showModal(modalDialog(title = NULL,
                         html_content,
                         size = "l",
@@ -27,7 +37,7 @@ server <- function(input, output, session) {
   output$caminhoPasta <- renderText({req(dir_path())
     paste("Pasta selecionada:", dir_path())})
   
-  #Rodar analise
+  # Rodar analise
   observeEvent(input$run_analysis,
                { shinyjs::hide("run_analysis")
                  shinyjs::show("loading_animation")
@@ -124,17 +134,17 @@ server <- function(input, output, session) {
     output$trim_stats <- renderTable(stats)
   })
   
-  #Paleta de cores escolhida
+  # Paleta de cores escolhida
   paleta_cores <- reactive({req(input$palette_choice)
     tolower(input$palette_choice)
   })
   
-  #Nomes originais dos arquivos para ajustar
+  # Nomes originais dos arquivos para ajustar
   nomes_arquivos <- reactive({req(input$arquivos)
     input$arquivos$name
   })
   
-  #Plot qualidade ciclo
+  # Plot qualidade ciclo
   output$plot_qualidade_ciclo_est <- renderPlot({req(resultado_qa())
     plotCycleQuality(resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
   })
@@ -165,7 +175,7 @@ server <- function(input, output, session) {
     }
   )
   
-  #Plot qualidade média 
+  # Plot qualidade média 
   output$plot_qualidade_media_est <- renderPlot({req(resultado_qa())
     readQualityScore(resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
   })
@@ -196,7 +206,7 @@ server <- function(input, output, session) {
     }
   )
   
-  #Plot contagem bases
+  # Plot contagem bases
   output$plot_contagens_est <- renderPlot({fls <- if (!is.null(input$arquivos)) {
     input$arquivos$datapath
   } else if (!is.null(dir_path())) {
@@ -239,7 +249,7 @@ server <- function(input, output, session) {
     }
   )
   
-  #Plot adapters
+  # Plot adapters
   output$plot_adapters_est <- renderPlot({fls <- if (!is.null(input$arquivos)) {
     input$arquivos$datapath
   } else if (!is.null(dir_path())) {
@@ -280,7 +290,7 @@ server <- function(input, output, session) {
     }
   )
   
-  #Plot ocorrencias
+  # Plot ocorrencias
   output$plot_ocorrencias_est <- renderPlot({req(resultado_qa())
     plotOcurrences(resultado_qa(), 
                    paleta_cores(), 
@@ -315,7 +325,7 @@ server <- function(input, output, session) {
     }
   )
   
-  #Tabela sequencias frequentes
+  # Tabela sequencias frequentes
   output$tabela_frequencias <- renderTable({req(resultado_qa())
     t <- freqSequences(resultado_qa())
     t$Arquivo <- input$arquivos$name[match(t$Arquivo,
@@ -324,7 +334,7 @@ server <- function(input, output, session) {
     t
   })
   
-  #Tabela adapters
+  # Tabela adapters
   output$tabela_adapters <- renderTable({fls <- if (!is.null(input$arquivos)) {
     input$arquivos$datapath
   }else if (!is.null(dir_path())) {

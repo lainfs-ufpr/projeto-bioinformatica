@@ -1,7 +1,7 @@
 # -------------------------------------------
 # Carregamento das bibliotecas, funções e objetos necessários
 # -------------------------------------------
-source("instalar_pacotes.R")
+source("scripts/instalar_pacotes.R")
 cran_pkgs <- c("tidyverse", "dplyr", "ggplot2", "tidyr", "scales", "plotly")
 bioc_pkgs <- c("ShortRead")
 instalar_pacotes(cran_pkgs, install.packages)

@@ -2,31 +2,31 @@ library(bslib)
 library(shinyjs)
 library(shinyFiles)
 library(shinyWidgets)
-#Front
+
+# FRONT
+
 ui <- fluidPage(
-  
-  # O tema base é CLARO (flatly), então ele será o padrão. 
-  # Se o usuário clicar no toggle, o tema muda.
+
   theme = bs_theme(version = 5, bg = "#FFFFFF", fg = "#31231a", 
                    bootswatch = "flatly", primary = "#1a754f", 
                    base_font = font_google("Lexend Deca")),
   useShinyjs(),
   
-  #Link css
+  # CSS
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
   
   
   page_navbar(
-    #Header (Argumento 'title')
+    # HEADER
     title = tags$span(tags$img(src = "logo-principal.png", id = "logo-fixo",
                                style = "height:80px; margin-right:10px; vertical-align:middle;"), 
                       "Controle de Qualidade de Sequências FASTQ", 
                       class = "titulo-app"),
     
-    # 1. PAINEL: QUALIDADE (Todo o conteúdo é movido para dentro deste nav_panel)
+    # QUALIDADE 
     nav_panel("Qualidade",
               sidebarLayout(
-                #sidebar vermelha
+                #sidebar
                 sidebarPanel(width = 3,
                              class = "sidebar-custom",
                              tags$h4("Para inicializar a análise, selecione o(s) arquivo(s) ou uma pasta", 
@@ -56,7 +56,7 @@ ui <- fluidPage(
                                          selected = "viridis")
                 ),
                 
-                #Paineis de gráficos
+                # Paineis de gráficos
                 mainPanel(width = 9,
                           navset_pill(nav_panel("Qualidade por Ciclo",
                                                 class = "titulo-plots",
@@ -181,12 +181,13 @@ ui <- fluidPage(
                           div(style = "margin-left: 20px;", textOutput("caminhoPasta"))
                 )
               )
-    ), # Fim do nav_panel("Qualidade")
+    ), 
     
-    # 2. PAINEL: TRIMAGEM
+    # TRIMAGEM
     nav_panel("Trimagem",
               sidebarLayout(
                 sidebarPanel(
+                  class = "sidebar-trim",
                   fileInput("fastq_trim", "Selecione arquivo FASTQ", accept = c(".fastq", ".fq")),
                   textInput("adapters", "Arquivo de adaptadores",
                             value = "Trimmomatic-0.39/adapters/TruSeq3-SE.fa"),
@@ -197,19 +198,18 @@ ui <- fluidPage(
                   actionButton("run_trim", "Rodar Trimmomatic", class = "btnQA-custom")
                 ),
                 mainPanel(
-                  verbatimTextOutput("trim_log"),
-                  
-                  # Centraliza a tabela horizontalmente
-                  div(style = "width: fit-content; margin-left: auto; margin-right: auto;",
-                      tableOutput("trim_stats")
+                  div(class = "trim-main-panel",
+                      verbatimTextOutput("trim_log"),
+                      div(style = "width: fit-content; margin-left: auto; margin-right: auto;",
+                          tableOutput("trim_stats")
+                      )
                   )
                 )
               )
-    ), # Fim do nav_panel("Trimagem")
+    ), 
     
     nav_spacer(),
-    
-    # Controle de modo (deixa value=FALSE para que o botão não esteja ativado)
+
     nav_item(input_dark_mode(id = "mode", value = FALSE)), 
     
     id = "page"

@@ -1,7 +1,7 @@
 # -------------------------------------------
 # Carregamento das Bibliotecas
 # -------------------------------------------
-source("instalar_pacotes.R")
+source("scripts/instalar_pacotes.R")
 cran_pkgs <- c("ggplot2", "plotly", "htmlwidgets", "dplyr")
 bioc_pkgs <- c("ShortRead")
 instalar_pacotes(cran_pkgs, install.packages)

@@ -1,3 +1,28 @@
+/* Modo claro */
+[data-bs-theme="light"] {
+  --bg-color: #ffffff;
+  --text-color: #222222;
+  --sidebar-bg: #940e01;
+  --accent-color: #0e432f;
+  --btn-text-color: #f0ffff; 
+  --hover-bg: #1a754f; 
+  --sidebar-text-color: #f0ffff; 
+  --plot-title-color: #0e432f; 
+}
+
+/* Modo escuro */
+[data-bs-theme="dark"] {
+  --bg-color: #2d221a;
+  --text-color: #f0ffff;
+  --sidebar-bg: #940e01; 
+  --accent-color: #1a754f;
+  --btn-text-color: #f0ffff;
+  --hover-bg: #0e432f; 
+  --sidebar-text-color: #f0ffff; 
+  --plot-title-color: #1a754f; 
+}
+
+
 @font-face {
   font-family: 'Phenomena';
   src: url('Phenomena-ExtraBold.otf') format('opentype');
@@ -6,6 +31,11 @@
 
 body {
   font-family: 'Lexend Deca', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, .titulo-app {
@@ -13,17 +43,10 @@ h1, h2, h3, .titulo-app {
   font-weight: bold;
 }
 
-/*Titulo*/
-.titulo-app {
-  color: #f0ffff; /* alterei para branco caso use a nav bar colorida*/
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 30px;
-}
 
 #palette_choice-label {
-  color: #FFFFFF; /* Cor do texto do label */
-  font-weight: bold; 
+  color: var(--sidebar-text-color);
+  font-weight: bold;
 }
 
 #logo-fixo {
@@ -37,41 +60,67 @@ h1, h2, h3, .titulo-app {
 }
 
 
+/*Titulo*/
+.titulo-app {
+  color: #f0ffff; 
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 30px;
+}
+
 /*sidebar*/
 .sidebar-custom {
-    background-color: #940e01;
-    border-radius: 18px;
-    padding: 20px;
-    width: 350px;
-    align-items: center;
-    margin-bottom: 20px;
+  background-color: var(--sidebar-bg);
+  border-radius: 18px;
+  padding: 20px;
+  width: 350px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sidebar-trim {
+  background-color: var(--sidebar-bg);
+  border-radius: 18px;
+  padding: 20px;
+  width: 550px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.trim-main-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center; 
+  height: 100%; 
+  text-align: center;
 }
 
 .titulo-sidebar{
-    text-align: center; 
-    font-size: 20px;
-    color: #f0ffff; 
-    margin-bottom: 20px;
+  text-align: center;
+  font-size: 20px;
+  color: var(--sidebar-text-color);
+  margin-bottom: 20px;
 }
 
 .message-input{
-  font-weight: bold: 
+  font-weight: bold;
   font-size: 12px;
-  color: #f0ffff;
+  color: var(--sidebar-text-color);
 }
 
-/*botão de input de arquivo*/  
+/*botão de input de arquivo*/
 .botao-arquivo .btn-file {
-  background: #0e432f;
+  background: var(--accent-color);
   border-radius: 10px;
   border: none;
-  color: #f0ffff;
+  color: var(--btn-text-color);
   transition: 0.1s;
 }
 
 .botao-arquivo .btn-file:hover {
-  background-color: #1a754f;
-  color: #f0ffff;
+  background-color: var(--hover-bg);
+  color: var(--btn-text-color);
 }
 
 .botao-arquivo .form-control {
@@ -85,86 +134,86 @@ h1, h2, h3, .titulo-app {
 
 /*Botão de seleção de pasta*/
 .botao-diretorio{
-    background-color: #0e432f;
-    color: #f0ffff;
-    border-radius: 20px;
-    border: none;
-    transition: 0.1s;
+  background-color: var(--accent-color);
+  color: var(--btn-text-color);
+  border-radius: 20px;
+  border: none;
+  transition: 0.1s;
 }
 
 .botao-diretorio:hover{
-    background-color: #1a754f;
-    color: #f0ffff;
-    
+  background-color: var(--hover-bg);
+  color: var(--btn-text-color);
 }
 
 /*Botão de paleta de cores*/
 .botao-cor{
-    background-color: #0e432f;
-    color: #f0ffff;
-    border-radius: 20px;
-    border: none;
-    transition: 0.1s;
+  background-color: var(--accent-color);
+  color: var(--btn-text-color);
+  border-radius: 20px;
+  border: none;
+  transition: 0.1s;
 }
 
 .botao-cor:hover{
-    background-color: #1a754f;
-    color: #f0ffff;
-    
+  background-color: var(--hover-bg);
+  color: var(--btn-text-color);
 }
- 
-/*Botão para rodar o controle de qualidade*/
+
+/*Botão para rodar o controle de qualidade e trimagem*/
 .btnQA-custom {
-    background-color: #0e432f;
-    color: #f0ffff;
-    text-align: center; 
-    border-radius: 20px;
-    border: none;
-    transition: 0.1s;
+  background-color: var(--accent-color);
+  color: var(--btn-text-color);
+  text-align: center;
+  border-radius: 20px;
+  border: none;
+  transition: 0.1s;
 }
-  
+
 /*Botão para rodar o QC ao passar o mouse por cima*/
 .btnQA-custom:hover {
-    background-color: #1a754f;
-    color: #f0ffff;
+  background-color: var(--hover-bg);
+  color: var(--btn-text-color);
 }
 
 /*Titulo dos plots*/
 .titulo-plots{
-    color: #0e432f;
-    margin-bottom: 20px;
+  color: var(--plot-title-color);
+  margin-bottom: 20px;
 }
 
 
 /*Animação de 'carregando' ao rodar o QC*/
 .loading-spinner {
-    border: 5px solid #f0ffff;
-    border-top: 5px solid #1a754f;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: spin 1s linear infinite;
-    margin: 10px auto;
+  border: 5px solid var(--text-color);
+  border-top: 5px solid var(--accent-color); 
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 10px auto;
 }
 
 /*Config da animação*/
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 #qa_output {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 10px;
-    text-align: center;
-    border-top: 1px solid #865F46;
-    z-index: 9999;
-    font-weight: bold;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  border-top: 1px solid #865F46;
+  z-index: 9999;
+  font-weight: bold;
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }
 
 table {
-    font-size: 10px;
+  font-size: 10px;
 }

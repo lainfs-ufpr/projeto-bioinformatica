@@ -1,11 +1,15 @@
-#Backend - servidor
+library(ShortRead)
+# Carregar funções prontas
+source("scripts/carrega_funcoes.R")
+
+# BACK
 server <- function(input, output, session) {
   
-  #Usa o conteudo html de um arquivo separado
+  # Usa o conteudo html de um arquivo separado
   html_content <- HTML(paste(readLines("www/apresentacao.html",
                                        encoding = "UTF-8"), collapse = "\n"))
   
-  #Cria uma tela inicial como se fosse uma caixa de dialogo
+  # Cria uma tela inicial como se fosse uma caixa de dialogo
   showModal(modalDialog(title = NULL,
                         html_content,
                         size = "l",
@@ -27,7 +31,7 @@ server <- function(input, output, session) {
   output$caminhoPasta <- renderText({req(dir_path())
     paste("Pasta selecionada:", dir_path())})
   
-  #Rodar analise
+  # Rodar analise
   observeEvent(input$run_analysis,
                { shinyjs::hide("run_analysis")
                  shinyjs::show("loading_animation")
@@ -79,17 +83,78 @@ server <- function(input, output, session) {
                  })
                })
   
-  #Paleta de cores escolhida
+  observeEvent(input$run_trim, {
+    req(input$fastq_trim)
+    
+    # Caminhos
+    trimmomatic <- "Trimmomatic-0.39/trimmomatic-0.39.jar"
+    input_fastq <- input$fastq_trim$datapath
+    output_fastq <- file.path(dirname(input_fastq), input$output_trim)
+    
+    # Comando do Trimmomatic
+    cmd <- paste(
+      "java -jar", shQuote(trimmomatic), "SE -phred33",
+      shQuote(input_fastq), shQuote(output_fastq),
+      paste0("ILLUMINACLIP:", input$adapters, ":2:30:10"),
+      paste0("SLIDINGWINDOW:", input$sliding_window, ":", input$quality_cutoff),
+      paste0("MINLEN:", input$minlen)
+    )
+    
+    shinyjs::html("trim_log", "<b style='color:black'>Rodando Trimmomatic...</b>")
+    
+    # Executar Trimmomatic e capturar o status de saída
+    status_saida <- tryCatch({
+      resultado <- system(cmd, intern = TRUE, ignore.stdout = FALSE, ignore.stderr = FALSE)
+      # Adicionar o log do trimmomatic
+      shinyjs::html("trim_log", paste0("Log do Trimmomatic:\n<pre>", 
+                                       paste(resultado, collapse = "\n"), 
+                                       "</pre>"))
+      attr(resultado, "status") # Retorna o status de saída
+    }, error = function(e) {
+      shinyjs::html("trim_log", paste0("Erro ao executar Trimmomatic: ", e$message))
+      return(1) # Retorna um status de erro
+    })
+    
+    # Verificar se o Trimmomatic foi executado com sucesso
+    if (!is.null(status_saida) && status_saida != 0) {
+      shinyjs::html("trim_log", paste0("<b style='color:red'>Erro na Trimagem. O Trimmomatic retornou um status de erro (", status_saida, "). Verifique o log acima e os caminhos.</b>"))
+      return() # Para a execução se houver erro
+    }
+    
+    # Verificar se o arquivo de saída existe antes de tentar ler
+    if (!file.exists(output_fastq)) {
+      shinyjs::html("trim_log", paste0("<b style='color:red'>Erro: Arquivo de saída esperado (", output_fastq, ") não foi encontrado após a execução do Trimmomatic.</b>"))
+      return()
+    }
+    
+    shinyjs::html("trim_log", paste("Trimagem concluída!\nArquivo salvo em:", output_fastq))
+    
+    # Calcular estatísticas antes e depois
+    library(ShortRead)
+    raw <- readFastq(input_fastq)
+    trimmed <- readFastq(output_fastq)
+    
+    stats <- data.frame(
+      Arquivo = c("Original", "Trimado"),
+      Reads = c(length(raw), length(trimmed)),
+      Tam_médio = c(mean(width(sread(raw))),
+                    mean(width(sread(trimmed))))
+    )
+    
+    output$trim_stats <- renderTable(stats)
+  })
+  
+  # Paleta de cores escolhida
   paleta_cores <- reactive({req(input$palette_choice)
     tolower(input$palette_choice)
   })
   
-  #Nomes originais dos arquivos para ajustar
+  # Nomes originais dos arquivos para ajustar
   nomes_arquivos <- reactive({req(input$arquivos)
     input$arquivos$name
   })
   
-  #Plot qualidade ciclo
+  # Plot qualidade ciclo
   output$plot_qualidade_ciclo_est <- renderPlot({req(resultado_qa())
     plotCycleQuality(resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
   })
@@ -120,7 +185,7 @@ server <- function(input, output, session) {
     }
   )
   
-  #Plot qualidade média 
+  # Plot qualidade média 
   output$plot_qualidade_media_est <- renderPlot({req(resultado_qa())
     readQualityScore(resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
   })
@@ -151,7 +216,7 @@ server <- function(input, output, session) {
     }
   )
   
-  #Plot contagem bases
+  # Plot contagem bases
   output$plot_contagens_est <- renderPlot({fls <- if (!is.null(input$arquivos)) {
     input$arquivos$datapath
   } else if (!is.null(dir_path())) {
@@ -194,7 +259,7 @@ server <- function(input, output, session) {
     }
   )
   
-  #Plot adapters
+  # Plot adapters
   output$plot_adapters_est <- renderPlot({fls <- if (!is.null(input$arquivos)) {
     input$arquivos$datapath
   } else if (!is.null(dir_path())) {
@@ -235,7 +300,7 @@ server <- function(input, output, session) {
     }
   )
   
-  #Plot ocorrencias
+  # Plot ocorrencias
   output$plot_ocorrencias_est <- renderPlot({req(resultado_qa())
     plotOcurrences(resultado_qa(), 
                    paleta_cores(), 
@@ -270,7 +335,7 @@ server <- function(input, output, session) {
     }
   )
   
-  #Tabela sequencias frequentes
+  # Tabela sequencias frequentes
   output$tabela_frequencias <- renderTable({req(resultado_qa())
     t <- freqSequences(resultado_qa())
     t$Arquivo <- input$arquivos$name[match(t$Arquivo,
@@ -279,7 +344,7 @@ server <- function(input, output, session) {
     t
   })
   
-  #Tabela adapters
+  # Tabela adapters
   output$tabela_adapters <- renderTable({fls <- if (!is.null(input$arquivos)) {
     input$arquivos$datapath
   }else if (!is.null(dir_path())) {

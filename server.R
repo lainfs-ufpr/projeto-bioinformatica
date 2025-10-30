@@ -1,12 +1,6 @@
 library(ShortRead)
-
-source("scripts/funcoes_prontas/plotAdapterContamination.R")
-source("scripts/funcoes_prontas/tableAdapterContamination.R")
-source("scripts/funcoes_prontas/freqSequences.R")
-source("scripts/funcoes_prontas/plotCycleQuality.R")
-source("scripts/funcoes_prontas/plotNucleotideCount.R")
-source("scripts/funcoes_prontas/readQualityScore.R")
-source("scripts/funcoes_prontas/plotOcurrences.R")
+# Carregar funções prontas
+source("scripts/carrega_funcoes.R")
 
 # BACK
 server <- function(input, output, session) {
@@ -108,16 +102,32 @@ server <- function(input, output, session) {
     
     shinyjs::html("trim_log", "<b style='color:black'>Rodando Trimmomatic...</b>")
     
-    # Executar Trimmomatic
-    resultado <- tryCatch({
-      system(cmd, intern = TRUE)
+    # Executar Trimmomatic e capturar o status de saída
+    status_saida <- tryCatch({
+      resultado <- system(cmd, intern = TRUE, ignore.stdout = FALSE, ignore.stderr = FALSE)
+      # Adicionar o log do trimmomatic
+      shinyjs::html("trim_log", paste0("Log do Trimmomatic:\n<pre>", 
+                                       paste(resultado, collapse = "\n"), 
+                                       "</pre>"))
+      attr(resultado, "status") # Retorna o status de saída
     }, error = function(e) {
-      paste("Erro:", e$message)
+      shinyjs::html("trim_log", paste0("Erro ao executar Trimmomatic: ", e$message))
+      return(1) # Retorna um status de erro
     })
     
-    output$trim_log <- renderText({
-      paste("Trimagem concluída!\nArquivo salvo em:", output_fastq)
-    })
+    # Verificar se o Trimmomatic foi executado com sucesso
+    if (!is.null(status_saida) && status_saida != 0) {
+      shinyjs::html("trim_log", paste0("<b style='color:red'>Erro na Trimagem. O Trimmomatic retornou um status de erro (", status_saida, "). Verifique o log acima e os caminhos.</b>"))
+      return() # Para a execução se houver erro
+    }
+    
+    # Verificar se o arquivo de saída existe antes de tentar ler
+    if (!file.exists(output_fastq)) {
+      shinyjs::html("trim_log", paste0("<b style='color:red'>Erro: Arquivo de saída esperado (", output_fastq, ") não foi encontrado após a execução do Trimmomatic.</b>"))
+      return()
+    }
+    
+    shinyjs::html("trim_log", paste("Trimagem concluída!\nArquivo salvo em:", output_fastq))
     
     # Calcular estatísticas antes e depois
     library(ShortRead)

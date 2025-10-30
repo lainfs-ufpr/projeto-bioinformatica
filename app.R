@@ -1,15 +1,10 @@
 library(shiny)
-# botão de download, precisa fazer o download 
-# dessa biblioteca e do svglite (para baixar svg)
 library(ShortRead)
 library(ggplot2)
 library(fs)
 library(scales)
 library(plotly)
 library(viridis)
-
-# Carregar funções prontas
-source("scripts/carrega_funcoes.R")
 
 # Tamanho máximo de input
 options(shiny.maxRequestSize = 100 * 1024^3)

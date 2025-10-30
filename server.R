@@ -79,6 +79,51 @@ server <- function(input, output, session) {
                  })
                })
   
+  observeEvent(input$run_trim, {
+    req(input$fastq_trim)
+    
+    # Caminhos
+    trimmomatic <- "Trimmomatic-0.39/trimmomatic-0.39.jar"
+    input_fastq <- input$fastq_trim$datapath
+    output_fastq <- file.path(dirname(input_fastq), input$output_trim)
+    
+    # Comando do Trimmomatic
+    cmd <- paste(
+      "java -jar", shQuote(trimmomatic), "SE -phred33",
+      shQuote(input_fastq), shQuote(output_fastq),
+      paste0("ILLUMINACLIP:", input$adapters, ":2:30:10"),
+      paste0("SLIDINGWINDOW:", input$sliding_window, ":", input$quality_cutoff),
+      paste0("MINLEN:", input$minlen)
+    )
+    
+    shinyjs::html("trim_log", "<b style='color:black'>Rodando Trimmomatic...</b>")
+    
+    # Executar Trimmomatic
+    resultado <- tryCatch({
+      system(cmd, intern = TRUE)
+    }, error = function(e) {
+      paste("Erro:", e$message)
+    })
+    
+    output$trim_log <- renderText({
+      paste("Trimagem concluída!\nArquivo salvo em:", output_fastq)
+    })
+    
+    # Calcular estatísticas antes e depois
+    library(ShortRead)
+    raw <- readFastq(input_fastq)
+    trimmed <- readFastq(output_fastq)
+    
+    stats <- data.frame(
+      Arquivo = c("Original", "Trimado"),
+      Reads = c(length(raw), length(trimmed)),
+      Tam_médio = c(mean(width(sread(raw))),
+                    mean(width(sread(trimmed))))
+    )
+    
+    output$trim_stats <- renderTable(stats)
+  })
+  
   #Paleta de cores escolhida
   paleta_cores <- reactive({req(input$palette_choice)
     tolower(input$palette_choice)

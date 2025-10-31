@@ -1,0 +1,96 @@
+# Função UI do Módulo de Qualidade
+qualidadeUI <- function(id) {
+  ns <- NS(id)
+  
+  sidebarLayout(
+    # Sidebar
+    sidebarPanel(width = 3,
+                 class = "sidebar-custom",
+                 tags$h4("Para inicializar a análise, selecione o(s) arquivo(s) ou uma pasta", 
+                         class = "titulo-sidebar"),
+                 
+                 div(style = "display:flex; flex-direction:column; gap:15px; margin-bottom:20px;",
+                     div(style = "display:flex; gap:15px; align-items:flex-center;",
+                         shinyDirButton(class = "botao-diretorio",
+                                        ns("diretorio"), "Adicionar uma pasta", "Selecionar"), 
+                         div(style = "display:flex; flex-direction:column;",
+                             tags$span("Adicionar um arquivo", class = "message-input"),
+                             div(class = "botao-arquivo",
+                                 fileInput(ns("arquivos"), label = NULL, multiple = TRUE,
+                                           accept = c(".fasta", ".fa", ".fastq", ".fq", "text/plain"))
+                             ),
+                         )
+                     ),
+                     div(id = ns("loading_animation"), class = "loading-spinner", style = "display: none;"),
+                     actionButton(ns("run_analysis"), "Rodar controle de qualidade", class = "btnQA-custom")
+                 ),
+                 
+                 tags$br(),
+                 
+                 selectInput(ns("palette_choice"), "Mude a paleta de cores aqui:",
+                             choices = c("viridis", "magma", "plasma", "rocket",
+                                         "cividis", "inferno", "turbo", "mako"),
+                             selected = "viridis")
+    ),
+    
+    # Paineis de gráficos
+    mainPanel(width = 9,
+              navset_pill(
+                nav_panel("Qualidade por Ciclo",
+                          class = "titulo-plots",
+                          plotOutput(ns("plot_qualidade_ciclo_est")),
+                          ui_download_plot(ns, "ciclo") 
+                ),
+                nav_panel("Qualidade Média",
+                          class = "titulo-plots",
+                          plotOutput(ns("plot_qualidade_media_est")),
+                          ui_download_plot(ns, "media")
+                ),
+                nav_panel("Contagem de Bases",
+                          class = "titulo-plots",
+                          plotOutput(ns("plot_contagens_est")),
+                          ui_download_plot(ns, "contagens")
+                ),
+                nav_panel("Distribuição Cumulativa de Leituras",
+                          class = "titulo-plots",
+                          plotOutput(ns("plot_ocorrencias_est")),
+                          ui_download_plot(ns, "ocorrencias")
+                ),
+                nav_panel("Sequências Frequentes",
+                          class = "titulo-plots",
+                          tableOutput(ns("tabela_frequencias"))
+                ),
+                nav_panel("Contaminação por Adaptadores",
+                          class = "titulo-plots",
+                          plotOutput(ns("plot_adapters_est")),
+                          ui_download_plot(ns, "adapters"),
+                          tableOutput(ns("tabela_adapters"))
+                )
+              ),
+              br(),
+              hr(),
+              div(id = ns("qa_output")),
+              div(style = "margin-left: 20px;", textOutput(ns("caminhoPasta")))
+    )
+  )
+}
+
+ui_download_plot <- function(ns, plot_name) {
+  shinyjs::hidden(
+    div(id = ns(paste0("download_plot_", plot_name)),
+        dropdownButton(
+          inputId = ns(paste0("download_opts_", plot_name)),
+          label = "Baixar gráfico", 
+          icon = icon("download"),
+          status = "primary",
+          circle = FALSE,
+          inline = TRUE,
+          
+          selectInput(ns(paste0("formato_download_", plot_name)), "Formato:",
+                      choices = c("png", "pdf", "jpeg", "svg"),
+                      selected = "pdf"),
+          downloadButton(ns(paste0("download_plot_", plot_name)), "Download")
+        )
+    )
+  )
+}

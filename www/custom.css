@@ -1,27 +1,28 @@
 /* Modo claro */
 [data-bs-theme="light"] {
   --bg-color: #ffffff;
-  --text-color: #222222;
+  --text-color: #31231a;
   --sidebar-bg: #940e01;
   --accent-color: #0e432f;
-  --btn-text-color: #f0ffff; 
-  --hover-bg: #1a754f; 
+  --header-bg: #1a754f;
+  --btn-text-color: #ffffff; 
+  --hover-bg: #0e432f; 
   --sidebar-text-color: #f0ffff; 
   --plot-title-color: #0e432f; 
 }
 
 /* Modo escuro */
 [data-bs-theme="dark"] {
-  --bg-color: #2d221a;
-  --text-color: #f0ffff;
+  --bg-color: #31231a;
+  --text-color: #ffffff;
   --sidebar-bg: #940e01; 
   --accent-color: #1a754f;
-  --btn-text-color: #f0ffff;
-  --hover-bg: #0e432f; 
-  --sidebar-text-color: #f0ffff; 
+  --header-bg: #0e432f;
+  --btn-text-color: #ffffff;
+  --hover-bg: #1a754f; 
+  --sidebar-text-color: #ffffff; 
   --plot-title-color: #1a754f; 
 }
-
 
 @font-face {
   font-family: 'Phenomena';
@@ -35,7 +36,6 @@ body {
   color: var(--text-color);
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
 }
 
 h1, h2, h3, .titulo-app {
@@ -59,6 +59,12 @@ h1, h2, h3, .titulo-app {
   opacity: 1;
 }
 
+.navbar { 
+  background-color: var(--header-bg); 
+  padding: 0;
+  padding-left: 20px;
+  padding-right: 20px;
+}
 
 /*Titulo*/
 .titulo-app {
@@ -80,6 +86,7 @@ h1, h2, h3, .titulo-app {
 
 .sidebar-trim {
   background-color: var(--sidebar-bg);
+  color: var(--btn-text-color);
   border-radius: 18px;
   padding: 20px;
   width: 550px;
@@ -216,4 +223,9 @@ h1, h2, h3, .titulo-app {
 
 table {
   font-size: 10px;
+}
+
+.container-fluid {
+  padding-left: 0;
+  padding-right: 0;
 }

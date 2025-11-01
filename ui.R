@@ -20,6 +20,8 @@ ui <- fluidPage(
   
   # CSS
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "qualidade.css")),
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "trimagem.css")),
   
   
   page_navbar(

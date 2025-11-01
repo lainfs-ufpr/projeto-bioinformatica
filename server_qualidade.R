@@ -1,5 +1,7 @@
+library(shinyjs)
 # Função Server do Módulo de Qualidade
 qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
+  useShinyjs()
   moduleServer(id, function(input, output, session) {
     
     paleta_cores <- reactive({
@@ -8,8 +10,20 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
     })
     
     nomes_arquivos <- reactive({
-      req(input$arquivos)
-      input$arquivos$name
+      # Prioriza arquivos carregados
+      if (!is.null(input$arquivos)) {
+        return(input$arquivos$name)
+      }
+      
+      # Se uma pasta foi selecionada e o caminho não é nulo/vazio
+      fls <- get_files_for_analysis()
+      if (!is.null(r_dir_path()) && length(fls) > 0) {
+        # Retorna o nome base dos caminhos encontrados na pasta
+        return(basename(fls))
+      }
+      
+      # Caso contrário, retorna NULL
+      return(NULL)
     })
     
     # Helper para determinar a lista de arquivos (usado em Contagem de Bases e Adapters)
@@ -17,7 +31,8 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
       if (!is.null(input$arquivos)) {
         return(input$arquivos$datapath)
       } else if (!is.null(r_dir_path())) {
-        return(dir(r_dir_path(), pattern = "*fq$", full.names = TRUE))
+        pattern_regex <- "\\.(fq|fastq|fa|fasta)(\\.gz)?$"
+        return(dir(r_dir_path(), pattern = pattern_regex, full.names = TRUE))
       } else {
         return(NULL)
       }

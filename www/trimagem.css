@@ -1,0 +1,30 @@
+/* Modo claro */
+[data-bs-theme="light"] {
+  --sidebar-bg: #940e01;
+  --sidebar-text-color: #f0ffff; 
+}
+
+/* Modo escuro */
+[data-bs-theme="dark"] {
+  --sidebar-bg: #940e01; 
+  --sidebar-text-color: #ffffff; 
+}
+
+.sidebar-trim {
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text-color);
+  border-radius: 18px;
+  padding: 20px;
+  width: 550px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.trim-main-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center; 
+  height: 100%; 
+  text-align: center;
+}

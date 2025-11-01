@@ -5,32 +5,34 @@ qualidadeUI <- function(id) {
   sidebarLayout(
     # Sidebar
     sidebarPanel(width = 3,
-                 class = "sidebar-custom",
+                 class = "sidebar",
                  tags$h4("Para inicializar a análise, selecione o(s) arquivo(s) ou uma pasta", 
                          class = "titulo-sidebar"),
                  
-                 div(style = "display:flex; flex-direction:column; gap:15px; margin-bottom:20px;",
-                     div(style = "display:flex; gap:15px; align-items:flex-center;",
+                 div(class = "painel-arquivos",
+                     div(class = "linha-arquivos",
                          shinyDirButton(class = "botao-diretorio",
                                         ns("diretorio"), "Adicionar uma pasta", "Selecionar"), 
-                         div(style = "display:flex; flex-direction:column;",
+                         div(class = "coluna-arquivo",
                              tags$span("Adicionar um arquivo", class = "message-input"),
                              div(class = "botao-arquivo",
                                  fileInput(ns("arquivos"), label = NULL, multiple = TRUE,
                                            accept = c(".fasta", ".fa", ".fastq", ".fq", "text/plain"))
-                             ),
+                             )
                          )
                      ),
-                     div(id = ns("loading_animation"), class = "loading-spinner", style = "display: none;"),
-                     actionButton(ns("run_analysis"), "Rodar controle de qualidade", class = "btnQA-custom")
+                    div(id = ns("loading_animation"), class = "loading_animation"),
+                    actionButton(ns("run_analysis"), "Rodar controle de qualidade", class = "btnQA-custom")
                  ),
                  
                  tags$br(),
                  
-                 selectInput(ns("palette_choice"), "Mude a paleta de cores aqui:",
-                             choices = c("viridis", "magma", "plasma", "rocket",
-                                         "cividis", "inferno", "turbo", "mako"),
-                             selected = "viridis")
+                 div(class = "botao-cor",
+                     selectInput(ns("palette_choice"), "Mude a paleta de cores aqui:",
+                                 choices = c("viridis", "magma", "plasma", "rocket",
+                                             "cividis", "inferno", "turbo", "mako"),
+                                 selected = "viridis")
+                     )
     ),
     
     # Paineis de gráficos

@@ -1,7 +1,9 @@
 library(shinyjs)
+library(shinyWidgets)
+
 # Função Server do Módulo de Qualidade
 qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
-  useShinyjs()
+
   moduleServer(id, function(input, output, session) {
     
     paleta_cores <- reactive({
@@ -59,9 +61,6 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
       shinyjs::show(session$ns("loading_animation"))
       shinyjs::html(session$ns("qa_output"), '<b style="color: black;">Controle de Qualidade em andamento...</b>')
       
-      # FORÇA A RENDERIZAÇÃO IMEDIATA DO SPINNER
-      # Esta pausa microscópica permite que a UI no navegador se atualize
-      # antes que a função qa() comece a bloquear a sessão do R.
       Sys.sleep(0.05) 
       
       # Lógica para obter arquivos
@@ -84,11 +83,11 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
         # 2. Esconde o spinner e mostra o resultado de sucesso
         
         # Mostra botões de download
-        shinyjs::show(session$ns("download_plot_ciclo"))
-        shinyjs::show(session$ns("download_plot_media"))
-        shinyjs::show(session$ns("download_plot_contagens"))
-        shinyjs::show(session$ns("download_plot_ocorrencias"))
-        shinyjs::show(session$ns("download_plot_adapters"))
+        shinyjs::show(session$ns("wrapper_download_ciclo"))
+        shinyjs::show(session$ns("wrapper_download_media"))
+        shinyjs::show(session$ns("wrapper_download_contagens"))
+        shinyjs::show(session$ns("wrapper_download_ocorrencias"))
+        shinyjs::show(session$ns("wrapper_download_adapters"))
         
         tempo_execucao <- Sys.time() - tempo_inicio
         shinyjs::html(session$ns("qa_output"),

@@ -1,3 +1,5 @@
+library(shinyjs)
+library(shinyWidgets)
 # Função UI do Módulo de Qualidade
 qualidadeUI <- function(id) {
   ns <- NS(id)
@@ -39,31 +41,25 @@ qualidadeUI <- function(id) {
     mainPanel(width = 9,
               navset_pill(
                 nav_panel("Qualidade por Ciclo",
-                          class = "titulo-plots",
                           plotOutput(ns("plot_qualidade_ciclo_est")),
                           ui_download_plot(ns, "ciclo") 
                 ),
                 nav_panel("Qualidade Média",
-                          class = "titulo-plots",
                           plotOutput(ns("plot_qualidade_media_est")),
                           ui_download_plot(ns, "media")
                 ),
                 nav_panel("Contagem de Bases",
-                          class = "titulo-plots",
                           plotOutput(ns("plot_contagens_est")),
                           ui_download_plot(ns, "contagens")
                 ),
                 nav_panel("Distribuição Cumulativa de Leituras",
-                          class = "titulo-plots",
                           plotOutput(ns("plot_ocorrencias_est")),
                           ui_download_plot(ns, "ocorrencias")
                 ),
                 nav_panel("Sequências Frequentes",
-                          class = "titulo-plots",
                           tableOutput(ns("tabela_frequencias"))
                 ),
                 nav_panel("Contaminação por Adaptadores",
-                          class = "titulo-plots",
                           plotOutput(ns("plot_adapters_est")),
                           ui_download_plot(ns, "adapters"),
                           tableOutput(ns("tabela_adapters"))
@@ -79,7 +75,7 @@ qualidadeUI <- function(id) {
 
 ui_download_plot <- function(ns, plot_name) {
   shinyjs::hidden(
-    div(id = ns(paste0("download_plot_", plot_name)),
+    div(id = ns(paste0("wrapper_download_", plot_name)),
         dropdownButton(
           inputId = ns(paste0("download_opts_", plot_name)),
           label = "Baixar gráfico", 

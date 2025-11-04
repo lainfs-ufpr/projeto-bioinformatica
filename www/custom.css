@@ -5,6 +5,7 @@
   --sidebar-bg: #940e01;
   --accent-color: #0e432f;
   --header-bg: #1a754f;
+  --header-text: #ffffff;
   --btn-text-color: #ffffff; 
   --hover-bg: #0e432f; 
   --sidebar-text-color: #f0ffff; 
@@ -18,6 +19,7 @@
   --sidebar-bg: #940e01; 
   --accent-color: #1a754f;
   --header-bg: #0e432f;
+  --header-text: #ffffff
   --btn-text-color: #ffffff;
   --hover-bg: #1a754f; 
   --sidebar-text-color: #ffffff; 
@@ -55,14 +57,20 @@ h1, h2, h3, .titulo-app {
 
 .navbar { 
   background-color: var(--header-bg); 
+  color: (--header-text);
   padding: 0;
   padding-left: 20px;
   padding-right: 20px;
 }
 
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  color: #ffffff;
+  background-color: var(--hover-bg);
+}
+
 /*Titulo*/
 .titulo-app {
-  color: var(--text-color); 
+  color: var(--header-text); 
   text-align: center;
   margin-bottom: 20px;
   font-size: 30px;

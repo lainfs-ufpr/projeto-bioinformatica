@@ -75,7 +75,7 @@ qualidadeUI <- function(id) {
 
 ui_download_plot <- function(ns, plot_name) {
   shinyjs::hidden(
-    div(id = ns(paste0("wrapper_download_", plot_name)),
+    div(id = ns(paste0("wrapper_download_", plot_name)), class = "btn-download-plot",
         dropdownButton(
           inputId = ns(paste0("download_opts_", plot_name)),
           label = "Baixar gráfico", 

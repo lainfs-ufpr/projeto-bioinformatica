@@ -3,6 +3,7 @@ library(shiny)
 library(fs)
 library(shinyFiles)
 library(shinyjs)
+library(shinyWidgets)
 library(ggplot2) 
 
 # Carregar funções prontas e módulos de servidor
@@ -24,13 +25,11 @@ server <- function(input, output, session) {
                         footer = modalButton("Iniciar"))
   )
   
-  dir_path <- reactiveVal(NULL)
-  resultado_qa <- reactiveVal(NULL)
   
   # O módulo de qualidade recebe o ID e as referências às variáveis de estado
-  qualidadeServer("qualidade_id", 
-                  r_dir_path = dir_path, 
-                  r_resultado_qa = resultado_qa)
+  r_dir_path <- reactiveVal(NULL)
+  r_resultado_qa <- reactiveVal(NULL)
+  qualidadeServer("qualidade_id", r_dir_path, r_resultado_qa)
   
   # O módulo de trimagem é independente
   trimagemServer("trimagem_id")

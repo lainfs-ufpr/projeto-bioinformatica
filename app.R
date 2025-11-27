@@ -5,6 +5,8 @@ library(fs)
 library(scales)
 library(plotly)
 library(viridis)
+library(shinyjs)
+library(shinyWidgets)
 
 # Tamanho máximo de input
 options(shiny.maxRequestSize = 100 * 1024^3)

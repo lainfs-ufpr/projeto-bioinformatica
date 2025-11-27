@@ -1,7 +1,6 @@
 library(shinyjs)
 library(shinyWidgets)
 
-# Função Server do Módulo de Qualidade
 qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
 
   moduleServer(id, function(input, output, session) {
@@ -57,54 +56,53 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
     observeEvent(input$run_analysis, {
       
       # 1. Mostra o spinner e o texto
-      shinyjs::hide(session$ns("run_analysis"))
-      shinyjs::show(session$ns("loading_animation"))
+      shinyjs::hide("run_analysis")
+      shinyjs::show("loading_animation")
       shinyjs::html(session$ns("qa_output"), '<b style="color: black;">Controle de Qualidade em andamento...</b>')
       
-      Sys.sleep(0.05) 
-      
       # Lógica para obter arquivos
-      fls <- get_files_for_analysis()
+      shinyjs::delay(100, {
+        fls <- get_files_for_analysis()
       
-      if (is.null(fls) || length(fls) == 0) {
-        showNotification("Nenhum arquivo FASTQ encontrado!", type = "error")
-        shinyjs::show(session$ns("run_analysis"))
-        shinyjs::hide(session$ns("loading_animation")) # Garante que esconde
-        return()
-      }
+        if (is.null(fls) || length(fls) == 0) {
+          showNotification("Nenhum arquivo FASTQ encontrado!", type = "error")
+          shinyjs::show(session$ns("run_analysis"))
+          shinyjs::hide(session$ns("loading_animation")) # Garante que esconde
+          return()
+        }
       
-      tryCatch({
-        tempo_inicio <- Sys.time()
+        tryCatch({
+          tempo_inicio <- Sys.time()
         
-        # --- FUNÇÃO DE LONGA DURAÇÃO ---
-        resultado <- qa(fls, type = "fastq")
-        r_resultado_qa(resultado) # Atualiza o reativo global
+          resultado <- qa(fls, type = "fastq")
+          r_resultado_qa(resultado) # Atualiza o reativo global
         
-        # 2. Esconde o spinner e mostra o resultado de sucesso
+          # 2. Esconde o spinner e mostra o resultado de sucesso
         
-        # Mostra botões de download
-        shinyjs::show(session$ns("wrapper_download_ciclo"))
-        shinyjs::show(session$ns("wrapper_download_media"))
-        shinyjs::show(session$ns("wrapper_download_contagens"))
-        shinyjs::show(session$ns("wrapper_download_ocorrencias"))
-        shinyjs::show(session$ns("wrapper_download_adapters"))
+          # Mostra botões de download
+          shinyjs::show("wrapper_download_ciclo")
+          shinyjs::show("wrapper_download_media")
+          shinyjs::show("wrapper_download_contagens")
+          shinyjs::show("wrapper_download_ocorrencias")
+          shinyjs::show("wrapper_download_adapters")
         
-        tempo_execucao <- Sys.time() - tempo_inicio
-        shinyjs::html(session$ns("qa_output"),
-                      paste0('<b style="color: #31231a">Controle de Qualidade finalizado! Tempo de execução:</b> ',
-                             round(tempo_execucao, 2), 
-                             ' segundos'))
+          tempo_execucao <- Sys.time() - tempo_inicio
+          shinyjs::html(session$ns("qa_output"),
+                        paste0('<b style="color: #31231a">Controle de Qualidade finalizado! Tempo de execução:</b> ',
+                              round(tempo_execucao, 2), 
+                              ' segundos'))
         
-        shinyjs::hide(session$ns("loading_animation"))
-        shinyjs::show(session$ns("run_analysis"))
+          shinyjs::hide("loading_animation")
+          shinyjs::show("run_analysis")
         
-      }, error = function(e) {
-        # 3. Esconde o spinner e mostra o erro
-        shinyjs::html(session$ns("qa_output"),
-                      paste0('<b style="color: #940e01">Erro: ', e$message, '</b>'))
+        }, error = function(e) {
+          # 3. Esconde o spinner e mostra o erro
+          shinyjs::html(session$ns("qa_output"),
+                        paste0('<b style="color: #940e01">Erro: ', e$message, '</b>'))
         
-        shinyjs::hide(session$ns("loading_animation"))
-        shinyjs::show(session$ns("run_analysis"))
+          shinyjs::hide("loading_animation")
+          shinyjs::show("run_analysis")
+        })
       })
     })
     

@@ -103,7 +103,7 @@
 }
 
 .shiny-file-input-progress {
-  background-color: var(--sidebar-bg)
+  background-color: var(--sidebar-bg);
   height: 5px; 
   font-size: 12px;
   border-radius: 0;

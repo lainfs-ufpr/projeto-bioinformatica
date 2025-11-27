@@ -1,6 +1,6 @@
 library(shinyjs)
 library(shinyWidgets)
-# Função UI do Módulo de Qualidade
+
 qualidadeUI <- function(id) {
   ns <- NS(id)
   

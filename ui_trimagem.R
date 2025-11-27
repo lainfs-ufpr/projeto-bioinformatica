@@ -4,7 +4,7 @@ trimagemUI <- function(id) {
   sidebarLayout(
     sidebarPanel(
       class = "sidebar-trim",
-
+      
       radioButtons(ns("mode"), "Tipo de leitura:",
                    choices = c("Single-end" = "SE", "Paired-end" = "PE"),
                    selected = "PE"),

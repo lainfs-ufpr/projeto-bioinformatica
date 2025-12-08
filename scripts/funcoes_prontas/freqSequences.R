@@ -20,7 +20,7 @@ library(stats)
 freqSequences <- function(qa_output, n_frequentes = 20) {
   
   # Ler arquivo de adapters
-  adapter_fasta <- readDNAStringSet("adapters.fasta")
+  adapter_fasta <- readDNAStringSet("data/adapters.fasta")
   
   # Contagens de todos os arquivos
   all_counts <- qa_output[["readCounts"]]

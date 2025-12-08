@@ -67,7 +67,7 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
         if (is.null(fls) || length(fls) == 0) {
           showNotification("Nenhum arquivo FASTQ encontrado!", type = "error")
           shinyjs::show(session$ns("run_analysis"))
-          shinyjs::hide(session$ns("loading_animation")) # Garante que esconde
+          shinyjs::hide(session$ns("loading_animation"))
           return()
         }
       
@@ -76,8 +76,6 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
         
           resultado <- qa(fls, type = "fastq")
           r_resultado_qa(resultado) # Atualiza o reativo global
-        
-          # 2. Esconde o spinner e mostra o resultado de sucesso
         
           # Mostra botões de download
           shinyjs::show("wrapper_download_ciclo")
@@ -96,7 +94,6 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
           shinyjs::show("run_analysis")
         
         }, error = function(e) {
-          # 3. Esconde o spinner e mostra o erro
           shinyjs::html(session$ns("qa_output"),
                         paste0('<b style="color: #940e01">Erro: ', e$message, '</b>'))
         

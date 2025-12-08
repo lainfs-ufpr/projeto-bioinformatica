@@ -60,7 +60,7 @@ plotAdapterContamination <- function(caminho_fastq, paleta_cores="viridis") {
   }
   
   # Ler arquivo de adaptadores
-  adapter_fasta <- readDNAStringSet("adapters.fasta")
+  adapter_fasta <- readDNAStringSet("data/adapters.fasta")
   
   # Se há apenas um arquivo fastq
   if (is.character(caminho_fastq) && length(caminho_fastq) == 1) {

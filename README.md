@@ -31,5 +31,3 @@ Esse comando instala todas as bibliotecas necessárias para compilar os pacotes 
 Após instalar as dependências do sistema, reinicie o RStudio para garantir que o R reconheça as bibliotecas recém-instaladas. 
 
 Então é possível rodar o script "dependencies.R" para instalar todas as bibliotecas necessárias!
-```
-

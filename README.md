@@ -26,9 +26,9 @@ sudo apt install -y \
   liblzma-dev
 ```
 
-Esse comando instala todas as bibliotecas necessárias para compilar os pacotes usados pelo ShortRead. \
+Esse comando instala todas as bibliotecas necessárias para compilar os pacotes usados pelo ShortRead. 
 
-Após instalar as dependências do sistema, reinicie o RStudio para garantir que o R reconheça as bibliotecas recém-instaladas. \
+Após instalar as dependências do sistema, reinicie o RStudio para garantir que o R reconheça as bibliotecas recém-instaladas. 
 
 Então é possível rodar o script "dependencies.R" para instalar todas as bibliotecas necessárias!
 ```

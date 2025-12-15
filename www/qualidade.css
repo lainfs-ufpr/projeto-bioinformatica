@@ -8,7 +8,6 @@
   --hover-bg: #1a754f;
   --text-color: #31231a;
   --plot-title-color: #0e432f; 
-  --test: #940eee;
 }
 
 /* Modo escuro */
@@ -21,7 +20,6 @@
   --hover-bg: #0e432f;
   --text-color: #ffffff;
   --plot-title-color: #1a754f;
-  --test: #940eee;
 }
 
 .sidebar {

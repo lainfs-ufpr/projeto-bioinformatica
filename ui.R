@@ -19,6 +19,7 @@ ui <- fluidPage(
   useShinyjs(),
   
   # CSS
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "apresent.css")),
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "qualidade.css")),
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "trimagem.css")),

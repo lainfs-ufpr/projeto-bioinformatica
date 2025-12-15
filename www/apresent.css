@@ -1,0 +1,64 @@
+.modal-container {
+    text-align: center;
+    background-color: #1a754f; 
+    padding: 20px 10px;
+    border-radius: 5px; 
+}
+
+.modal-logo {
+    margin-bottom: 15px;
+}
+
+.modal-titulo {
+    font-family: 'Phenomena', sans-serif;
+    color: #0e432f;
+    font-size: 28px;
+    margin-top: 0;
+}
+
+.modal-paragrafo {
+    font-size: 16px;
+    color:  #ffffff; 
+    margin-left : 10px;
+}
+
+.modal-subtitle {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.modal-lista {
+    text-align: left;
+    max-width: 500px;
+    margin: 10px auto 20px auto; 
+    color:  #ffffff; 
+    list-style-type: circle; 
+}
+
+.modal-footer-text {
+    font-size: 14px;
+    color:  #ffffff;
+    margin-top: 20px;
+}
+
+.modal-instagram-icon {
+    margin-bottom: 5px;
+}
+
+.modal-dialog.apresentacao-modal .modal-content {
+    background-color: #0e432f;
+    border: none; 
+    box-shadow: none; 
+}
+
+.modal-dialog.apresentacao-modal .modal-body {
+    padding: 0;
+}
+
+.modal-dialog.apresentacao-modal .modal-footer {
+    background-color:  #940e01; 
+    border-top: 1px solid  #940e01;
+    padding: 10px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}

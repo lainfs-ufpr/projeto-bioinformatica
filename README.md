@@ -6,7 +6,7 @@ Este projeto utiliza o pacote **ShortRead** (Bioconductor). \
 Em sistemas Linux (especialmente Ubuntu), é comum ocorrer erro durante a instalação por falta de dependências do sistema operacional necessárias para compilar pacotes a partir do código-fonte. \
 O ShortRead depende de vários pacotes do Bioconductor, que utilizam código em C/C++ e precisam de bibliotecas externas do sistema, se essas bibliotecas não estiverem instaladas, o R falha ao compilar os pacotes.
 
-Caso tenha encontrado problemas para rodar o projeto e o ShortRead não esteja instalado, abra um terminal e execute:
+Caso tenha encontrado problemas para rodar o projeto e o ShortRead ou tidyverse não estejam instalados, abra um terminal e execute:
 
 ```bash
 sudo apt update
@@ -24,6 +24,15 @@ sudo apt install -y \
   zlib1g-dev \
   libbz2-dev \
   liblzma-dev
+  
+  libfribidi-dev \
+  libfontconfig1-dev \
+  libharfbuzz-dev \
+  libfreetype6-dev \
+  libpng-dev \
+  libtiff5-dev \
+  libjpeg-dev
+
 ```
 
 Esse comando instala todas as bibliotecas necessárias para compilar os pacotes usados pelo ShortRead. 

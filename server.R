@@ -22,8 +22,7 @@ server <- function(input, output, session) {
                         html_content,
                         size = "l",
                         easyClose = TRUE,
-                        footer = modalButton("Iniciar"),
-                        class = "apresentacao-modal"))
+                        footer = modalButton("Iniciar")))
   
   
   # O módulo de qualidade recebe o ID e as referências às variáveis de estado

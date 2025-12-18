@@ -11,12 +11,14 @@ Possui como objetivo fornecer uma solução integrada e acessível para o contro
 ![Download](images/download.png)
 
 ### 2️⃣: Dependências
-Rode o script "dependencies.R" para instalar todos os pacotes necessários, caso você utilize o Sistema Operacional Linux/Ubuntu pode ser que seja necessário instalar algumas bibliotecas extras, para mais informações veja [Ir para Sistema Operacional Linux-Ubuntu](#sistema-operacional-linux-ubuntu)
+Rode o script "dependencies.R" para instalar todos os pacotes necessários, caso você utilize o Sistema Operacional Linux/Ubuntu pode ser que seja necessário instalar algumas bibliotecas extras, para mais informações veja [Sistema Operacional Linux-Ubuntu](#sistema-operacional-linux-ubuntu)
 
 ### 3️⃣: Run App
 No RStudio, abra o arquivo "app.R" e clique em "Run App", espere a interface carregar e a ferramenta estará pronta para uso
 ![Rodar](images/RunApp.png)
-![Apresenta](images/apresenta.png)
+<img src="images/apresenta.png" alt="Apresenta" width="400" height="250">
+
+---
 
 ### Sistema Operacional Linux-Ubuntu 
 

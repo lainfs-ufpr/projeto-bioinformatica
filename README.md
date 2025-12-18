@@ -9,16 +9,16 @@ Possui como objetivo fornecer uma solução integrada e acessível para o contro
 
 ## Como utilizar a Ferramenta
 
-### 1️⃣: Faça o download dos arquivos desse repositório
-![Download](images/download.png)
+### Faça o download dos arquivos desse repositório
+![Download](data/images/download.png)
 
 ### 2️⃣: Dependências
 Rode o script "dependencies.R" para instalar todos os pacotes necessários, caso você utilize o Sistema Operacional Linux/Ubuntu pode ser que seja necessário instalar algumas bibliotecas extras, para mais informações veja [Sistema Operacional Linux-Ubuntu](#sistema-operacional-linux-ubuntu)
 
 ### 3️⃣: Run App
 No RStudio, abra o arquivo "app.R" e clique em "Run App", espere a interface carregar e a ferramenta estará pronta para uso
-![Rodar](images/RunApp.png) \
-<img src="images/apresenta.png" alt="Apresenta" width="550" height="650">
+![Rodar](data/images/RunApp.png) \
+<img src="data/images/apresenta.png" alt="Apresenta" width="550" height="650">
 
 ---
 

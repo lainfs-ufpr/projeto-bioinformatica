@@ -44,7 +44,7 @@ tableAdapterContamination <- function(caminho_fastq){
   }
   
   # Ler arquivo de adaptadores
-  adapter_fasta <- readDNAStringSet("data/adapters.fasta")
+  adapter_fasta <- readDNAStringSet("data/adapters/adapters.fasta")
 
   if (is.character(caminho_fastq) && length(caminho_fastq) == 1) {
     df_adapters_final <- constroi_df(caminho_fastq)

@@ -60,8 +60,8 @@ qualidadeUI <- function(id) {
                           tableOutput(ns("tabela_frequencias"))
                 ),
                 nav_panel("Contaminação por Adaptadores",
-                          plotOutput(ns("plot_adapters_est")),
-                          ui_download_plot(ns, "adapters"),
+                          #plotOutput(ns("plot_adapters_est")),
+                          #ui_download_plot(ns, "adapters"),
                           tableOutput(ns("tabela_adapters"))
                 )
               ),

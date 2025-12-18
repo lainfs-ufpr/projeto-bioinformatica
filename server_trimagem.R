@@ -18,12 +18,18 @@ trimagemServer <- function(id) {
       outdir <- file.path(tempdir(), paste0("trim_", format(Sys.time(), "%Y%m%d_%H%M%S")))
       dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
       
-      trimmomatic_jar <- input$trimmomatic_path
+      trimmomatic_jar <- input$trimmomatic_jar$datapath
+      
+      
+      if (is.null(trimmomatic_jar) || !file.exists(trimmomatic_jar)) {
+        last_log("Arquivo JAR do Trimmomatic não encontrado.")
+        return()
+      }
       
       if (input$adapter_choice == "custom" && nzchar(input$custom_adapter)) {
         adapters_file <- input$custom_adapter
       } else {
-        adapters_file <- file.path("Trimmomatic-0.39/adapters", input$adapter_choice)
+        adapters_file <- file.path("data/adapters/", input$adapter_choice)
       }
       
       # parâmetros de trimming

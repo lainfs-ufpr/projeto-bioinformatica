@@ -39,9 +39,13 @@ trimagemUI <- function(id) {
         )
       ),
       
-      textInput(ns("trimmomatic_path"), "Caminho do Trimmomatic .jar", 
-                value = "Trimmomatic-0.39/trimmomatic-0.39.jar"),
-      
+      div(class = "botao-arquivo",
+          fileInput(
+            ns("trimmomatic_jar"),
+            "Arquivo Trimmomatic (.jar)",
+            accept = ".jar"
+          )),
+
       selectInput(ns("adapter_choice"), "Escolher adaptador:",
                   choices = c("TruSeq3-PE" = "TruSeq3-PE.fa",
                               "TruSeq3-SE" = "TruSeq3-SE.fa",

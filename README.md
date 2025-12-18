@@ -1,5 +1,5 @@
 # LAINFS - Controle de Qualidade e Trimagem
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![Badge em Desenvolvimento](http://img.shields.io/static/v1?label=STATUS&message=EmDesenvolvimento&color=YELLOW&style=for-the-badge)
 
 ## Sistema Operacional Linux-Ubuntu 
 

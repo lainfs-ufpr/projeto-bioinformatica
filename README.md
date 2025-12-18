@@ -5,6 +5,8 @@
 Esta ferramenta foi desenvolvida para realizar análise da qualidade de dados de sequenciamento no formato FASTQ, a ferramenta disponibiliza também uma seção dedicada à trimagem, permitindo o pré-processamento dos dados por meio da remoção de bases de baixa qualidade e adaptadores. \
 Possui como objetivo fornecer uma solução integrada e acessível para o controle de qualidade (QC) e pré-processamento de dados de sequenciamento.
 
+--- 
+
 ## Como utilizar a Ferramenta
 
 ### 1️⃣: Faça o download dos arquivos desse repositório
@@ -15,8 +17,8 @@ Rode o script "dependencies.R" para instalar todos os pacotes necessários, caso
 
 ### 3️⃣: Run App
 No RStudio, abra o arquivo "app.R" e clique em "Run App", espere a interface carregar e a ferramenta estará pronta para uso
-![Rodar](images/RunApp.png)
-<img src="images/apresenta.png" alt="Apresenta" width="400" height="250">
+![Rodar](images/RunApp.png) \
+<img src="images/apresenta.png" alt="Apresenta" width="550" height="650">
 
 ---
 
@@ -51,6 +53,8 @@ sudo apt install -y \
 ```
 Após instalar as dependências do sistema, reinicie o RStudio para garantir que o R reconheça as bibliotecas recém-instaladas. 
 Então é possível rodar o script "dependencies.R" para instalar todas as bibliotecas necessárias!
+
+---
 
 ## Autoria
 Este projeto foi desenvolvido pela diretoria de Bioinformática da Liga Acadêmcia de Informática em Saúde (LAINFS) da Universidade Federal do Paraná (UFPR) em parceria com o Instituto Pelé Pequeno Príncipe.

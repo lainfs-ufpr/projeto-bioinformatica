@@ -57,7 +57,7 @@ Então é possível rodar o script "dependencies.R" para instalar todas as bibli
 ---
 
 ## Autoria
-Este projeto foi desenvolvido pela diretoria de Bioinformática da Liga Acadêmcia de Informática em Saúde (LAINFS) da Universidade Federal do Paraná (UFPR) em parceria com o Instituto Pelé Pequeno Príncipe.
+Este projeto foi desenvolvido pela diretoria de Bioinformática da Liga Acadêmica de Informática em Saúde (LAINFS) da Universidade Federal do Paraná (UFPR) em parceria com o Instituto Pelé Pequeno Príncipe.
 
 ## Atualizações Futuras
 - Nova etapa de análise de qualidade após trimagem  

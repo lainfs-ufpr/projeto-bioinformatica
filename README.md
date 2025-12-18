@@ -1,17 +1,30 @@
 # LAINFS - Controle de Qualidade e Trimagem
 ![Badge em Desenvolvimento](http://img.shields.io/static/v1?label=STATUS&message=EM%20DESENVOLVIMENTO&color=orange&style=for-the-badge)
 
-## Sistema Operacional Linux-Ubuntu 
+## Sobre a Ferramenta
+Esta ferramenta foi desenvolvida para realizar análise da qualidade de dados de sequenciamento no formato FASTQ, a ferramenta disponibiliza também uma seção dedicada à trimagem, permitindo o pré-processamento dos dados por meio da remoção de bases de baixa qualidade e adaptadores. \
+Possui como objetivo fornecer uma solução integrada e acessível para o controle de qualidade (QC) e pré-processamento de dados de sequenciamento.
 
-Este projeto utiliza o pacote **ShortRead** (Bioconductor). \
+## Como utilizar a Ferramenta
+
+### Faça o download dos arquivos desse repositório
+![Download](images/download.png)
+
+### Dependências
+Rode o script "dependencies.R" para instalar todos os pacotes necessários, caso você utilize o Sistema Operacional Linux/Ubuntu pode ser que seja necessário instalar algumas bibliotecas extras, para mais informações veja [Ir para Sistema Operacional Linux-Ubuntu](#sistema-operacional-linux-ubuntu)
+
+### Run App
+No RStudio, abra o arquivo "app.R" e clique em "Run App", espere a interface carregar e a ferramenta estará pronta para uso
+![Rodar](images/app.png)
+![Apresenta](images/apresenta.png)
+
+### Sistema Operacional Linux-Ubuntu 
+
+Este projeto utiliza os pacotes **ShortRead** e **tidyverse**. \
 Em sistemas Linux (especialmente Ubuntu), é comum ocorrer erro durante a instalação por falta de dependências do sistema operacional necessárias para compilar pacotes a partir do código-fonte. \
-O ShortRead depende de vários pacotes do Bioconductor, que utilizam código em C/C++ e precisam de bibliotecas externas do sistema, se essas bibliotecas não estiverem instaladas, o R falha ao compilar os pacotes.
-
-Caso tenha encontrado problemas para rodar o projeto e o ShortRead ou tidyverse não estejam instalados, abra um terminal e execute:
-
+Caso tenha encontrado problemas para rodar o projeto e o ShortRead ou tidyverse não estejam instalados, é possível que seja necessário rodar em um terminal:
 ```bash
 sudo apt update
-
 sudo apt install -y \
   build-essential \
   gfortran \
@@ -33,11 +46,12 @@ sudo apt install -y \
   libpng-dev \
   libtiff5-dev \
   libjpeg-dev
-
 ```
-
-Esse comando instala todas as bibliotecas necessárias para compilar os pacotes usados pelo ShortRead. 
-
 Após instalar as dependências do sistema, reinicie o RStudio para garantir que o R reconheça as bibliotecas recém-instaladas. 
-
 Então é possível rodar o script "dependencies.R" para instalar todas as bibliotecas necessárias!
+
+## Autoria
+Este projeto foi desenvolvido pela diretoria de Bioinformática da Liga Acadêmcia de Informática em Saúde (LAINFS) da Universidade Federal do Paraná (UFPR) em parceria com o Instituto Pelé Pequeno Príncipe.
+
+## Atualizações Futuras
+- Nova etapa de análise de qualidade após trimagem  

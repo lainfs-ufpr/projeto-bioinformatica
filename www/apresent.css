@@ -45,20 +45,27 @@
     margin-bottom: 5px;
 }
 
-.modal-dialog.apresentacao-modal .modal-content {
-    background-color: #0e432f;
-    border: none; 
-    box-shadow: none; 
+.modal-footer button {
+  background-color: #940e01;
+  border: none;
+  color: #ffffff; 
 }
 
-.modal-dialog.apresentacao-modal .modal-body {
-    padding: 0;
+.modal-footer button:hover {
+  background-color: #31231a;
+  border: none;
+  color: #ffffff; 
 }
 
-.modal-dialog.apresentacao-modal .modal-footer {
-    background-color:  #940e01; 
-    border-top: 1px solid  #940e01;
-    padding: 10px;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
+/* fundo do botão de iniciar */
+.modal-footer {
+  background-color: #1a754f;
+  border-top: none;
+}
+
+/* fundo do container */
+.modal-body {
+  background-color: #1a754f;
+  border-top: 15px;
+  border-bottom: none;
 }

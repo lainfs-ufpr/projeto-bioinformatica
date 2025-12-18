@@ -7,12 +7,37 @@ trimagemUI <- function(id) {
       
       radioButtons(ns("mode"), "Tipo de leitura:",
                    choices = c("Single-end" = "SE", "Paired-end" = "PE"),
-                   selected = "PE"),
+                   selected = "SE"),
       
-      fileInput(ns("r1"), "FASTQ R1 (gzip aceito .fastq(.gz))", 
-                accept = c(".fastq", ".fq", ".fastq.gz", ".fq.gz")),
-      fileInput(ns("r2"), "FASTQ R2 (para PE apenas, opcional)", 
-                accept = c(".fastq", ".fq", ".fastq.gz", ".fq.gz")),
+      conditionalPanel(
+        condition = "input.mode == 'SE'",
+        ns = ns,
+        div(class = "botao-arquivo",
+            fileInput(ns("r1"), 
+                      "FASTQ R1 (gzip aceito .fastq(.gz))", 
+                      accept = c(".fastq", ".fq", ".fastq.gz", ".fq.gz")
+            )
+        )
+      ),
+      
+      conditionalPanel(
+        condition = "input.mode == 'PE'",
+        ns = ns,
+        div(class = "lado-lado",
+            div(class = "botao-arquivo",
+                fileInput(ns("r1"), 
+                          "FASTQ R1 (gzip aceito .fastq(.gz))", 
+                          accept = c(".fastq", ".fq", ".fastq.gz", ".fq.gz")
+                )
+            ),
+            div(class = "botao-arquivo",
+                fileInput(ns("r2"), 
+                          "FASTQ R2 (gzip aceito .fastq(.gz))", 
+                          accept = c(".fastq", ".fq", ".fastq.gz", ".fq.gz")
+                ) 
+            )
+        )
+      ),
       
       textInput(ns("trimmomatic_path"), "Caminho do Trimmomatic .jar", 
                 value = "Trimmomatic-0.39/trimmomatic-0.39.jar"),
@@ -33,17 +58,39 @@ trimagemUI <- function(id) {
                   value = "")
       ),
       
-      numericInput(ns("window_size"), "SLIDINGWINDOW - tamanho da janela", value = 4, min = 1),
-      numericInput(ns("qual_cut"), "SLIDINGWINDOW - cutoff de qualidade", value = 20, min = 2),
-      numericInput(ns("minlen"), "MINLEN - comprimento mínimo (bp)", value = 50, min = 1),
-      numericInput(ns("leading"), "LEADING - corta na esquerda (Q)", value = 3, min = 0),
-      numericInput(ns("trailing"), "TRAILING - corta na direita (Q)", value = 3, min = 0),
+      div(class = "coluna",
+          div(class = "lado-lado",
+              numericInput(ns("window_size"), "SLIDINGWINDOW - tamanho da janela", value = 4, min = 1),
+              numericInput(ns("qual_cut"), "SLIDINGWINDOW - cutoff de qualidade", value = 20, min = 2),
+              ),
+          numericInput(ns("minlen"), "MINLEN - comprimento mínimo (bp)", value = 25, min = 1),
+          div(class = "lado-lado",
+              numericInput(ns("leading"), "LEADING - corta na esquerda (Q)", value = 3, min = 0),
+              numericInput(ns("trailing"), "TRAILING - corta na direita (Q)", value = 3, min = 0),
+              ),
+      ),
       
       actionButton(ns("run"), "Rodar Trimmomatic", class = "btnQA-custom"), 
       hr(),
-      downloadButton(ns("download_r1_paired"), "Download R1_paired"),
-      downloadButton(ns("download_r2_paired"), "Download R2_paired"),
-      downloadButton(ns("download_single_trimmed"), "Download SE_trimmed")
+      
+      conditionalPanel(
+        condition = "input.mode == 'PE'",
+        ns = ns,
+        downloadButton(ns("download_r1_paired"), 
+                        "Download R1_paired",
+                        class = "btn-trim-download"),
+        downloadButton(ns("download_r2_paired"), 
+                       "Download R2_paired",
+                       class = "btn-trim-download") 
+      ),
+      
+      conditionalPanel(
+        condition = "input.mode == 'SE'",
+        ns = ns,
+        downloadButton(ns("download_single_trimmed"), 
+                        "Download SE_trimmed", 
+                        class = "btn-trim-download")
+        )
     ),
     
     mainPanel(

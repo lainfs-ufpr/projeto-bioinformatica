@@ -1,12 +1,16 @@
 /* Modo claro */
 [data-bs-theme="light"] {
   --sidebar-bg: #940e01;
+  --btn: #0e432f;
+  --btn-hover: #1a754f;
   --sidebar-text-color: #f0ffff; 
 }
 
 /* Modo escuro */
 [data-bs-theme="dark"] {
   --sidebar-bg: #940e01; 
+  --btn: #1a754f;
+  --btn-hover: #0e432f;
   --sidebar-text-color: #ffffff; 
 }
 
@@ -15,7 +19,7 @@
   color: var(--sidebar-text-color);
   border-radius: 18px;
   padding: 20px;
-  width: 550px;
+  width: 600px;
   align-items: center;
   margin-bottom: 20px;
 }
@@ -27,4 +31,38 @@
   justify-content: center; 
   height: 100%; 
   text-align: center;
+}
+
+.btn-trim-download {
+  background-color: var(--btn);
+  border: none;
+  color: var(--sidebar-text-color);
+  border-radius: 6px;
+}
+
+.btn-trim-download:hover {
+  background-color: var(--btn-hover);
+  border: none;
+  color: var(--sidebar-text-color);
+  border-radius: 6px;
+}
+
+.coluna {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lado-lado {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.lado-lado .form-group {
+    flex: 1;
+}
+
+.lado-lado .shiny-input-container {
+  width: 50%;
 }

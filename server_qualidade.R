@@ -55,12 +55,10 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
     
     observeEvent(input$run_analysis, {
       
-      # 1. Mostra o spinner e o texto
       shinyjs::hide("run_analysis")
       shinyjs::show("loading_animation")
       shinyjs::html(session$ns("qa_output"), '<b style="color: black;">Controle de Qualidade em andamento...</b>')
       
-      # Lógica para obter arquivos
       shinyjs::delay(100, {
         fls <- get_files_for_analysis()
       
@@ -75,9 +73,8 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
           tempo_inicio <- Sys.time()
         
           resultado <- qa(fls, type = "fastq")
-          r_resultado_qa(resultado) # Atualiza o reativo global
+          r_resultado_qa(resultado) 
         
-          # Mostra botões de download
           shinyjs::show("wrapper_download_ciclo")
           shinyjs::show("wrapper_download_media")
           shinyjs::show("wrapper_download_contagens")

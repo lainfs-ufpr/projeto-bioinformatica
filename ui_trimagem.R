@@ -23,16 +23,19 @@ trimagemUI <- function(id) {
       conditionalPanel(
         condition = "input.mode == 'PE'",
         ns = ns,
-        div(class = "botao-arquivo",
-            fileInput(ns("r1"), 
-                      "FASTQ R1 (gzip aceito .fastq(.gz))", 
-                      accept = c(".fastq", ".fq", ".fastq.gz", ".fq.gz")
+        div(class = "lado-lado",
+            div(class = "botao-arquivo",
+                fileInput(ns("r1"), 
+                          "FASTQ R1 (gzip aceito .fastq(.gz))", 
+                          accept = c(".fastq", ".fq", ".fastq.gz", ".fq.gz")
+                )
             ),
-            fileInput(ns("r2"), 
-                      "FASTQ R2 (para PE apenas, opcional)", 
-                      accept = c(".fastq", ".fq", ".fastq.gz", ".fq.gz")
+            div(class = "botao-arquivo",
+                fileInput(ns("r2"), 
+                          "FASTQ R2 (gzip aceito .fastq(.gz))", 
+                          accept = c(".fastq", ".fq", ".fastq.gz", ".fq.gz")
+                ) 
             )
-          
         )
       ),
       

@@ -60,14 +60,80 @@ trimagemUI <- function(id) {
       
       div(class = "coluna",
           div(class = "lado-lado",
-              numericInput(ns("window_size"), "SLIDINGWINDOW - tamanho da janela", value = 4, min = 1),
-              numericInput(ns("qual_cut"), "SLIDINGWINDOW - cutoff de qualidade", value = 20, min = 2),
+              numericInput(
+                ns("window_size"),
+                label = tagList(
+                  bslib::tooltip(
+                    trigger = icon("info-circle"),
+                    "Número de bases analisadas por vez",
+                    placement = "bottom",
+                    class = "info-icon"
+                  ),
+                  "SLIDINGWINDOW"
+                ),
+                value = 4, min = 1
               ),
-          numericInput(ns("minlen"), "MINLEN - comprimento mínimo (bp)", value = 25, min = 1),
+              
+              numericInput(
+                ns("qual_cut"),
+                label = tagList(
+                  bslib::tooltip(
+                    trigger = icon("info-circle"),
+                    "Qualidade média mínima dentro da janela de bases analisadas, utilizado para remover regiões de queda gradual de qualidade",
+                    placement = "bottom",
+                    class = "info-icon"
+                  ),
+                  "CUTOFF"
+                ),
+                value = 20, min = 2
+              )
+          ),
+              
+          numericInput(
+            ns("minlen"),
+            label = tagList(
+              bslib::tooltip(
+                trigger = icon("info-circle"),
+                "Comprimento minímo, reads com menos bp do que o indicado serão removidos",
+                placement = "bottom",
+                class = "info-icon"
+              ),
+              "MINLEN"
+            ),
+            value = 25, min = 1
+          ),
+          
           div(class = "lado-lado",
-              numericInput(ns("leading"), "LEADING - corta na esquerda (Q)", value = 3, min = 0),
-              numericInput(ns("trailing"), "TRAILING - corta na direita (Q)", value = 3, min = 0),
+              numericInput(
+                ns("leading"),
+                label = tagList(
+                  bslib::tooltip(
+                    trigger = icon("info-circle"),
+                    "Remove as bases com qualidade menor que o indicado no início da sequência, 
+                    para no momento que encontra uma base com qualidade superior ao indicado",
+                    placement = "bottom",
+                    class = "info-icon"
+                  ),
+                  "LEADING"
+                ),
+                value = 3, min = 0
               ),
+
+              numericInput(
+                ns("trailing"),
+                label = tagList(
+                  bslib::tooltip(
+                    trigger = icon("info-circle"),
+                    "Remove as bases com qualidade menor que o indicado no final da sequência,
+                    para no momento que encontra uma base com qualidade superior ao indicado",
+                    placement = "bottom",
+                    class = "info-icon"
+                  ),
+                  "TRAILING"
+                ),
+                value = 3, min = 0
+              )
+          )
       ),
       
       actionButton(ns("run"), "Rodar Trimmomatic", class = "btnQA-custom"), 
@@ -100,7 +166,7 @@ trimagemUI <- function(id) {
           tableOutput(ns("stats_table")), 
           h4("Plot: qualidade média por ciclo (R1)"),
           plotOutput(ns("qual_plot"), height = "360px") 
+        )
       )
     )
-  )
 }

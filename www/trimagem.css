@@ -3,7 +3,7 @@
   --sidebar-bg: #940e01;
   --btn: #0e432f;
   --btn-hover: #1a754f;
-  --sidebar-text-color: #f0ffff; 
+  --sidebar-text-color: #ffffff; 
 }
 
 /* Modo escuro */
@@ -61,4 +61,15 @@
 
 .lado-lado .form-group {
     flex: 1;
+}
+
+.info-icon {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--sidebar-text-color);
+}
+
+.info-icon:hover {
+  color: var(--btn-hover);
 }

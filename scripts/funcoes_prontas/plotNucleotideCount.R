@@ -29,7 +29,7 @@ plotNucleotideCount <- function(caminho_fastq, paleta_cores="viridis", nomes_arq
   if (is.character(caminho_fastq) && length(caminho_fastq) == 1) {
     
     # Ler arquivo
-    stream <- ShortRead::FastqStreamer(caminho_fastq)
+    stream <- ShortRead::FastqStreamer(caminho_fastq) # Lendo o arquivo novamente, isso é necessário?
     reads <- character()
     
     repeat {

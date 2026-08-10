@@ -60,15 +60,15 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
       
       shinyjs::hide("run_analysis")
       shinyjs::show("loading_animation")
-      shinyjs::html(session$ns("qa_output"), '<b style="color: black;">Controle de Qualidade em andamento...</b>')
+      shinyjs::html("qa_output", '<b style="color: #0e432f;">Controle de Qualidade em andamento...</b>')
       
       shinyjs::delay(100, {
         fls <- get_files_for_analysis()
         
         if (is.null(fls) || length(fls) == 0) {
           showNotification("Nenhum arquivo FASTQ encontrado!", type = "error")
-          shinyjs::show(session$ns("run_analysis"))
-          shinyjs::hide(session$ns("loading_animation"))
+          shinyjs::show("run_analysis")
+          shinyjs::hide("loading_animation")
           return()
         }
         
@@ -128,7 +128,7 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
         
         p <- plotCycleQuality(r_resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
         
-        ggsave(filename = file, plot = p, width = 8, height = 6, device = input$formato_download_ciclo)
+        ggsave(filename = file, plot = p, width = 8, height = 6, device = input$formato_download_ciclo, dpi = 300)
       }
     )
     
@@ -148,15 +148,14 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
         
         p <- readQualityScore(r_resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
         
-        ggsave(filename = file, plot = p, width = 8, height = 6, device = input$formato_download_media)
+        ggsave(filename = file, plot = p, width = 8, height = 6, device = input$formato_download_media, dpi = 300)
       }
     )
     
     # Plot contagem bases
     output$plot_contagens_est <- renderPlot({
-      fls <- get_files_for_analysis()
-      req(fls)
-      plotNucleotideCount(fls, paleta_cores(), nomes_arquivos())$p_estatico
+      req(r_resultado_qa())
+      plotNucleotideCount(r_resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
     })
     
     # Download do plot contagem bases
@@ -165,12 +164,11 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
         paste0("contagens.", input$formato_download_contagens)
       },
       content = function(file) {
-        fls <- get_files_for_analysis()
-        req(fls, paleta_cores(), input$formato_download_contagens)
+        req(r_resultado_qa(), paleta_cores(), input$formato_download_contagens)
         
-        p <- plotNucleotideCount(fls, paleta_cores(), nomes_arquivos())$p_estatico
+        p <- plotNucleotideCount(r_resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
         
-        ggsave(filename = file, plot = p, width = 8, height = 6, device = input$formato_download_contagens)
+        ggsave(filename = file, plot = p, width = 8, height = 6, device = input$formato_download_contagens, dpi = 300)
       }
     )
     
@@ -190,7 +188,7 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
         
         p <- plotOcurrences(r_resultado_qa(), paleta_cores(), nomes_arquivos())$p_estatico
         
-        ggsave(filename = file, plot = p, width = 8, height = 6, device = input$formato_download_ocorrencias)
+        ggsave(filename = file, plot = p, width = 8, height = 6, device = input$formato_download_ocorrencias, dpi = 300)
       }
     )
     
@@ -212,7 +210,18 @@ qualidadeServer <- function(id, r_dir_path, r_resultado_qa) {
     output$tabela_adapters <- renderTable({
       fls <- get_files_for_analysis()
       req(fls)
-      t <- tableAdapterContamination(fls)
+      
+      usa_amostragem <- isTRUE(input$amostragem_adapters)
+      tamanho_amostra <- if (usa_amostragem) {
+        req(input$tamanho_amostra_adapters)
+        input$tamanho_amostra_adapters
+      } else {
+        100000 # não usado quando amostragem = FALSE
+      }
+      
+      t <- tableAdapterContamination(fls,
+                                     amostragem = usa_amostragem,
+                                     n_amostra = tamanho_amostra)
       
       nomes <- nomes_arquivos() 
       if (!is.null(nomes)) {

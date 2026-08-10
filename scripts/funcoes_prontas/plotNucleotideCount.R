@@ -3,93 +3,68 @@
 # -------------------------------------------
 source("scripts/instalar_pacotes.R")
 cran_pkgs <- c("tidyverse", "dplyr", "ggplot2", "tidyr", "scales", "plotly")
-bioc_pkgs <- c("ShortRead")
 instalar_pacotes(cran_pkgs, install.packages)
-instalar_pacotes(bioc_pkgs, BiocManager::install)
 
-library(ShortRead)    
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(scales)
-library(stats)
 library(plotly)
 
 # -------------------------------------------
 # Função para verificar a frequência das bases por read
-# Param -  caminho_fastq: caminho para o arquivo .fastq
+#
+# Reaproveita os dados já calculados pelo ShortRead::qa() (componente
+# perCycle$baseCall), evitando reabrir/reler os arquivos FASTQ do disco.
+#
+# Param -  qa_output: objeto retornado por ShortRead::qa()
 # Param -  paleta_cores: string com nome da paleta escolhida pelo usuario
 # Param -  nomes_arquivos: nomes originais dos arquivos de entrada
 # Return - lista_plots: lista nomeada com plot estático e plot interativo
 # -------------------------------------------
-plotNucleotideCount <- function(caminho_fastq, paleta_cores="viridis", nomes_arquivos) {
+plotNucleotideCount <- function(qa_output, paleta_cores = "viridis", nomes_arquivos) {
   
-  # Um arquivo
-  if (is.character(caminho_fastq) && length(caminho_fastq) == 1) {
+  # perCycle$baseCall: Cycle, Base, Count, lane (lane = nome do arquivo)
+  df_base <- qa_output[["perCycle"]][["baseCall"]]
+  
+  df_base <- df_base %>%
+    dplyr::filter(Base %in% c("A", "T", "C", "G", "N")) %>%
+    dplyr::mutate(Base = factor(Base, levels = c("A", "T", "C", "G", "N")),
+                  Arquivo = as.character(lane))
+  
+  # Frequência de cada base dentro de cada ciclo (posição) e arquivo
+  df_frequencias <- df_base %>%
+    dplyr::group_by(Arquivo, Cycle) %>%
+    dplyr::mutate(Frequency = Count / sum(Count)) %>%
+    dplyr::ungroup()
+  
+  # Ajusta nomes dos arquivos
+  df_frequencias$Arquivo <- nomes_arquivos[
+    match(df_frequencias$Arquivo,
+          unique(df_frequencias$Arquivo))
+  ]
+  
+  n_arquivos <- length(unique(df_frequencias$Arquivo))
+  
+  # Um arquivo: distribuição da frequência de cada base ao longo dos ciclos
+  if (n_arquivos == 1) {
     
-    # Ler arquivo
-    stream <- ShortRead::FastqStreamer(caminho_fastq) # Lendo o arquivo novamente, isso é necessário?
-    reads <- character()
-    
-    repeat {
-      
-      chunk <- ShortRead::yield(stream)
-      
-      if (length(chunk) == 0)
-        break
-      
-      reads <- c(reads,
-                 as.character(ShortRead::sread(chunk)))
-    }
-    
-    close(stream)
-    
-    # Realizar contagens
-    contagens <- lapply(reads, function(seq) {
-      table(factor(strsplit(seq, "")[[1]], levels = c("A", "T", "C", "G", "N")))
-    })
-    
-    # Organizar dataframe
-    df_contagens <- do.call(rbind, contagens)
-    rownames(df_contagens) <- paste0("Read", seq_along(reads))
-    df_contagens <- as.data.frame(df_contagens)
-    
-    df_frequencias <- df_contagens %>%
-      tibble::rownames_to_column(var = "Sample") %>%
-      tidyr::pivot_longer(cols = A:N, names_to = "Base", values_to = "Count") %>%
-      dplyr::mutate(Base = factor(Base, levels = c("A", "T", "C", "G", "N"))) %>%
-      dplyr::group_by(Sample) %>%
-      dplyr::mutate(Frequency = Count / sum(Count)) %>%
-      dplyr::ungroup()
-    
-    df_frequencias$Arquivo <- rep(basename(caminho_fastq), nrow(df_frequencias))
-    
-    # Ajusta nomes dos arquivos
-    df_frequencias$Arquivo <- nomes_arquivos[
-      match(df_frequencias$Arquivo,
-            unique(df_frequencias$Arquivo))
-    ]
-    
-    # Gerar cores suficientes para as bases (5 cores)
     n_cores <- length(levels(df_frequencias$Base))
     cores <- viridis::viridis(n_cores, option = paleta_cores)
-    
-    # Expandir se a paleta for menor que n_cores
     if (length(cores) < n_cores) {
       cores <- rep(cores, length.out = n_cores)
     }
     
-    # Montar plot
     p_estatico <- ggplot2::ggplot(df_frequencias, ggplot2::aes(x = Base,
-                                                                y = Frequency,
-                                                                fill = Base)) +
+                                                               y = Frequency,
+                                                               fill = Base)) +
       ggplot2::geom_boxplot(alpha = 0.9, outlier.shape = NA, color = "black") +
       ggplot2::geom_jitter(width = 0.2, size = 1, alpha = 0.5) +
       ggplot2::scale_y_continuous(trans = scales::pseudo_log_trans(sigma = 1)) +
       ggplot2::scale_fill_manual(values = cores) +
       ggplot2::labs(
-        title = "Distribuição da Frequência de Bases por Read",
+        title = "Distribuição da Frequência de Bases por Ciclo",
         x = "Base",
         y = "Frequência (pseudo-log)"
       ) +
@@ -100,42 +75,18 @@ plotNucleotideCount <- function(caminho_fastq, paleta_cores="viridis", nomes_arq
         panel.grid.minor = ggplot2::element_blank(),
         axis.line = ggplot2::element_line(color = "grey")
       )
-  
-  # Mais de um arquivo  
+    
+    # Mais de um arquivo: frequência média de cada base por arquivo
   } else {
-    # Vetor de arquivos
-    lista_dfs <- lapply(caminho_fastq, function(arquivo) {
-      stream <- FastqStreamer(arquivo)
-      fq <- yield(stream)
-      reads <- as.character(sread(fq))
-      
-      contagens <- lapply(reads, function(seq) {
-        table(factor(strsplit(seq, "")[[1]], levels = c("A", "T", "C", "G", "N")))
-      })
-      
-      # Organizar dataframe
-      df_contagens <- do.call(rbind, contagens)
-      df_contagens <- as.data.frame(df_contagens)
-      
-      df_frequencias <- df_contagens %>%
-        pivot_longer(cols = A:N, names_to = "Base", values_to = "Count") %>%
-        group_by(Base) %>%
-        summarise(MeanFrequency = mean(Count / rowSums(df_contagens))) %>%
-        mutate(Arquivo = basename(arquivo))
-      
-      return(df_frequencias)
-    })
     
-    df_todos <- do.call(rbind, lista_dfs)
-    df_todos$Base <- factor(df_todos$Base, levels = c("A", "T", "C", "G", "N"))
+    df_todos <- df_frequencias %>%
+      dplyr::group_by(Arquivo, Base) %>%
+      dplyr::summarise(MeanFrequency = mean(Frequency), .groups = "drop")
     
-    # Gerar cores suficientes para as bases (5 cores)
-    n_bases <- length(unique(df_todos$Arquivo))
-    cores <- viridis::viridis(n_bases, option = paleta_cores)
+    cores <- viridis::viridis(n_arquivos, option = paleta_cores)
     
-    # Montar plot
     p_estatico <- ggplot(df_todos, aes(x = Base, y = MeanFrequency,
-                                        color = Arquivo, group = Arquivo)) +
+                                       color = Arquivo, group = Arquivo)) +
       geom_point(size = 2, alpha = 0.5, position = position_dodge(width = 0.4)) +
       scale_color_manual(values = cores) +
       labs(
@@ -143,47 +94,50 @@ plotNucleotideCount <- function(caminho_fastq, paleta_cores="viridis", nomes_arq
         x = "Base",
         y = "Frequência Média"
       ) +
-      theme(legend.position = "right",
+      theme(plot.title = element_text(size = 20, color = "black"),
+            axis.text = element_text(size = 16),
+            axis.title = element_text(size = 16),
+            legend.text = element_text(size = 16),
+            legend.title = element_text(size = 16), legend.position = "right",
             panel.background = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.line = element_line(color = "grey"))
   }
   
-  
   # Cria gráfico interativo
   p_interativo <- ggplotly(p_estatico)
   p_interativo <- p_interativo %>%
-                  layout(
-                    title = list(
-                      font = list(
-                        size = 16,
-                        color = "black"
-                      )
-                    ),
-                    xaxis = list(
-                      titlefont = list(
-                        size = 14,
-                        color = "black"
-                      ),
-                      showgrid = FALSE,      
-                      zeroline = FALSE,   
-                      showline = TRUE,
-                      linecolor = "gray",      
-                      linewidth = 1         
-                    ),
-                    yaxis = list(
-                      titlefont = list(
-                        size = 14,
-                        color = "black"
-                      ),
-                      showgrid = FALSE,      
-                      zeroline = FALSE,
-                      showline = TRUE,
-                      linecolor = "gray",    
-                      linewidth = 1
-                    )
-                  )
+    layout(
+      title = list(
+        font = list(
+          size = 20,
+          color = "black"
+        )
+      ),
+      xaxis = list(
+        titlefont = list(
+          size = 16,
+          color = "black"
+        ),
+        showgrid = FALSE,      
+        zeroline = FALSE,   
+        showline = TRUE,
+        linecolor = "gray",      
+        linewidth = 1         
+      ),
+      yaxis = list(
+        titlefont = list(
+          size = 16,
+          color = "black"
+        ),
+        showgrid = FALSE,      
+        zeroline = FALSE,
+        showline = TRUE,
+        linecolor = "gray",    
+        linewidth = 1
+      )
+    )
   
   # Retorna lista com os dois gráficos (estático e interativo)
   lista_plots <- list(p_interativo = p_interativo, p_estatico = p_estatico)

@@ -175,14 +175,17 @@ plotAdapterContamination <- function(caminho_fastq, paleta_cores="viridis") {
       x = "Posição (par de bases)",
       y = "Proporção de reads contaminados"
     ) +
-    theme(
-      legend.position = "right",
-      legend.title = element_text(),
-      panel.background = element_blank(),
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank(),
-      axis.line = element_line(color = "grey")
-    )
+    theme(plot.title = element_text(size = 20, color = "black"),
+          axis.text = element_text(size = 16),
+          axis.title = element_text(size = 16),
+          legend.text = element_text(size = 16),
+          legend.title = element_text(size = 16),
+          legend.position = "right",
+          legend.title = element_text(),
+          panel.background = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(color = "grey"))
   
   # Ajusta plot interativo
   p_interativo <- p_interativo %>%
@@ -193,7 +196,7 @@ plotAdapterContamination <- function(caminho_fastq, paleta_cores="viridis") {
                       text = if (houve_hits) "Contaminação Cumulativa de Adaptadores" else 
                         "Contaminação Cumulativa de Adaptadores (sem hits detectados)",
                       font = list(
-                        size = 16,
+                        size = 20,
                         color = "black"
                       ),
                       xanchor = "left",
@@ -203,7 +206,7 @@ plotAdapterContamination <- function(caminho_fastq, paleta_cores="viridis") {
                     xaxis = list(
                       title = "Posição (par de bases)",
                       titlefont = list(
-                        size = 14,
+                        size = 16,
                         color = "black"
                       ),
                       showgrid = FALSE,      
@@ -215,7 +218,7 @@ plotAdapterContamination <- function(caminho_fastq, paleta_cores="viridis") {
                     yaxis = list(
                       title = "Proporção de reads contaminados",
                       titlefont = list(
-                        size = 14,
+                        size = 16,
                         color = "black"
                       ),
                       showgrid = FALSE,      

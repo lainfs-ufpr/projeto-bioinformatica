@@ -23,8 +23,35 @@ qualidadeUI <- function(id) {
                              )
                          )
                      ),
-                    div(id = ns("loading_animation"), class = "loading_animation"),
-                    actionButton(ns("run_analysis"), "Rodar controle de qualidade", class = "btnQA-custom")
+                     
+                     div(class = "opcoes-adapters",
+                         tags$div(class = "linha-opcao-info",
+                                  checkboxInput(ns("amostragem_adapters"),
+                                                "Amostragem de reads (adaptadores)",
+                                                value = TRUE),
+                                  bslib::tooltip(
+                                    icon("circle-info", class = "icone-info"),
+                                    tags$div(
+                                      tags$b("Amostragem:"),
+                                      " mais rápido: analisa uma amostra aleatória de reads por arquivo. Recomendado para arquivos grandes.",
+                                      tags$br(),
+                                      tags$b("Arquivo completo:"),
+                                      " mais lento: analisa 100% das reads. Use quando precisar ter certeza sobre contaminações raras."
+                                    ),
+                                    placement = "right"
+                                  )
+                         ),
+                         conditionalPanel(
+                           condition = "input.amostragem_adapters",
+                           ns = ns,
+                           numericInput(ns("tamanho_amostra_adapters"),
+                                        "Tamanho da amostra (reads por arquivo):",
+                                        value = 100000, min = 1000, step = 1000)
+                         )
+                     ),
+                     
+                     div(id = ns("loading_animation"), class = "loading_animation"),
+                     actionButton(ns("run_analysis"), "Rodar controle de qualidade", class = "btnQA-custom")
                  ),
                  
                  tags$br(),
@@ -34,7 +61,7 @@ qualidadeUI <- function(id) {
                                  choices = c("viridis", "magma", "plasma", "rocket",
                                              "cividis", "inferno", "turbo", "mako"),
                                  selected = "viridis")
-                     )
+                 )
     ),
     
     # Paineis de gráficos
@@ -42,7 +69,7 @@ qualidadeUI <- function(id) {
               navset_pill(
                 nav_panel("Qualidade por Ciclo",
                           plotOutput(ns("plot_qualidade_ciclo_est")),
-                          ui_download_plot(ns, "ciclo") 
+                          ui_download_plot(ns, "ciclo")
                 ),
                 nav_panel("Qualidade Média",
                           plotOutput(ns("plot_qualidade_media_est")),
@@ -80,20 +107,35 @@ qualidadeUI <- function(id) {
 
 ui_download_plot <- function(ns, plot_name) {
   shinyjs::hidden(
-    div(id = ns(paste0("wrapper_download_", plot_name)), class = "btn-download-plot",
-        dropdownButton(
-          inputId = ns(paste0("download_opts_", plot_name)),
-          label = "Baixar gráfico", 
-          icon = icon("download"),
-          status = "primary",
-          circle = FALSE,
-          inline = TRUE,
+    div(
+      id = ns(paste0("wrapper_download_", plot_name)),
+      class = "btn-download-plot",
+      
+      tags$details(
+        class = "download-dropdown",
+        
+        tags$summary(
+          class = "download-summary",
+          icon("download"),
+          "Baixar gráfico"
+        ),
+        
+        div(
+          class = "download-menu",
           
-          selectInput(ns(paste0("formato_download_", plot_name)), "Formato:",
-                      choices = c("png", "pdf", "jpeg", "svg"),
-                      selected = "pdf"),
-          downloadButton(ns(paste0("download_plot_", plot_name)), "Download")
+          selectInput(
+            ns(paste0("formato_download_", plot_name)),
+            "Formato:",
+            choices = c("png", "pdf", "jpeg", "svg", "tiff"),
+            selected = "pdf"
+          ),
+          
+          downloadButton(
+            ns(paste0("download_plot_", plot_name)),
+            "Download"
+          )
         )
+      )
     )
   )
 }

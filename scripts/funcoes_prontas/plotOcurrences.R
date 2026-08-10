@@ -53,12 +53,16 @@ plotOcurrences <- function(qa_output, paleta_cores="viridis", nomes_arquivos) {
       title = "Distribuição Cumulativa por Número de Ocorrências",
       x = "Número de ocorrências por leitura (log10)",
       y = "Proporção cumulativa das leituras") +
-    theme(
-      legend.position = "right",
-      panel.background = element_blank(),
-      panel.grid.major = element_blank(),  
-      panel.grid.minor = element_blank(),
-      axis.line = element_line(color = "grey"))
+    theme(plot.title = element_text(size = 20, color = "black"),
+          axis.text = element_text(size = 16),
+          axis.title = element_text(size = 16),
+          legend.text = element_text(size = 16),
+          legend.title = element_text(size = 16),
+          legend.position = "right",
+          panel.background = element_blank(),
+          panel.grid.major = element_blank(),  
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(color = "grey"))
   
   # Cria gráfico interativo
   p_interativo <- ggplotly(p_estatico)
@@ -66,13 +70,13 @@ plotOcurrences <- function(qa_output, paleta_cores="viridis", nomes_arquivos) {
     layout(
       title = list(
         font = list(
-          size = 16,
+          size = 20,
           color = "black"
         )
       ),
       xaxis = list(
         titlefont = list(
-          size = 14,
+          size = 16,
           color = "black"
         ),
         showgrid = FALSE,      
@@ -83,7 +87,7 @@ plotOcurrences <- function(qa_output, paleta_cores="viridis", nomes_arquivos) {
       ),
       yaxis = list(
         titlefont = list(
-          size = 14,
+          size = 16,
           color = "black"
         ),
         showgrid = FALSE,      

@@ -76,7 +76,7 @@ plotCycleQuality <- function(qa_output, paleta_cores="viridis", nomes_arquivos) 
     title = list(
       text = "Qualidade das Sequências por Ciclo",
       font = list(
-        size = 16,
+        size = 20,
         color = "black"
       ),
       xanchor = "left",
@@ -86,7 +86,7 @@ plotCycleQuality <- function(qa_output, paleta_cores="viridis", nomes_arquivos) 
     xaxis = list(
       title = "Ciclo",
       titlefont = list(
-        size = 14,
+        size = 16,
         color = "black"
       ),
       showgrid = FALSE,      
@@ -98,7 +98,7 @@ plotCycleQuality <- function(qa_output, paleta_cores="viridis", nomes_arquivos) 
     yaxis = list(
       title = "Score de Qualidade (Phred)",
       titlefont = list(
-        size = 14,
+        size = 16,
         color = "black"
       ),
       showgrid = FALSE,      
@@ -121,13 +121,32 @@ plotCycleQuality <- function(qa_output, paleta_cores="viridis", nomes_arquivos) 
   
   # Monta plot estático
   p_estatico <- ggplot(df_mediana, aes(x = Ciclo, y = Mediana, group = Arquivo)) +
-    geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 28, ymax = 42),
-              fill = "#d0f0d0", alpha = 0.015) +
-    geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 20, ymax = 28),
-              fill = "#f0f0d0", alpha = 0.015) +
-    geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = 20),
-              fill = "#f0d0d0", alpha = 0.015) +
-    geom_line(aes(color = Arquivo), linewidth = 0.7, show.legend = TRUE) +
+    geom_rect(
+      xmin = -Inf, xmax = Inf,
+      ymin = 28, ymax = 42,
+      fill = "#d0f0d0",
+      alpha = 1,
+      inherit.aes = FALSE
+    ) +
+    geom_rect(
+      xmin = -Inf, xmax = Inf,
+      ymin = 20, ymax = 28,
+      fill = "#f0f0d0",
+      alpha = 1,
+      inherit.aes = FALSE
+    ) +
+    geom_rect(
+      xmin = -Inf, xmax = Inf,
+      ymin = 0, ymax = 20,
+      fill = "#f0d0d0",
+      alpha = 1,
+      inherit.aes = FALSE
+    ) +
+    geom_line(
+      aes(color = Arquivo),
+      linewidth = 0.7,
+      show.legend = TRUE
+    ) +
     labs(
       title = "Qualidade das Sequências por Ciclo",
       x = "Ciclo",
@@ -136,8 +155,12 @@ plotCycleQuality <- function(qa_output, paleta_cores="viridis", nomes_arquivos) 
     scale_y_continuous(limits = c(0, 42), expand = c(0, 0)) +
     scale_x_continuous(expand = c(0, 0)) +
     scale_color_manual(values = cores) +
-    theme(legend.position = "right",
-          legend.text = element_text(),
+    theme(plot.title = element_text(size = 20, color = "black"),
+          axis.text = element_text(size = 16),
+          axis.title = element_text(size = 16),
+          legend.text = element_text(size = 16),
+          legend.title = element_text(size = 16),
+          legend.position = "right",
           panel.background = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),

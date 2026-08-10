@@ -196,52 +196,39 @@
 }
 
 /* Seleção do tipo de arquivo para download */
-.btn-download-plot {
-  background-color: transparent;
-  border: none;
+.download-dropdown {
+  display: inline-block;
+  position: relative;
 }
 
-.btn-download-plot:hover {
-  background-color: transparent;
+.download-summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  background-color: var(--btn-text-color);
+  color: var(--btn-bg);
 }
 
-.btn-download-plot .dropdown-menu {
-  background-color: var(--bg-color);
-  border-radius: 12px;
-  border: 1px solid
-  padding: 12px 16px;
-}
-
-.btn-download-plot .dropdown-menu label {
-  color: var(--text-color);
-  margin-bottom: 6px;
-}
-
-.btn-download-plot .dropdown-menu .selectize-dropdown .option {
-  background-color: var(--slt-bg);
-  color: var(--slt-text);
-}
-
-.btn-download-plot .dropdown-menu .selectize-dropdown .option:hover {
-  background-color: var(--slt-hover-bg);
-  color: var(--slt-hover-text);
-}
-
-
-/* Botão externo de download dos plots */
-.btn-primary {
-  background-color: var(--sidebar-bg);
-  color: var(--sidebar-text-color);
-}
-
-.btn-primary:hover {
+.download-summary:hover {
   background-color: var(--btn-hover-bg);
-  color: (--btn-hover-txt);
+  color: var(--btn-bg);
 }
 
-.btn-primary:focus {
-  background-color: var(--btn-hover-bg);
-  color: (--btn-hover-txt);
+.download-summary::-webkit-details-marker {
+  display: none;
+}
+
+.download-menu {
+  position: absolute;
+  z-index: 1000;
+  padding: 15px;
+  margin-top: 5px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.15);
+  min-width: 220px;
 }
 
 /* Links */

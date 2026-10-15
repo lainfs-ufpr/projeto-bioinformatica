@@ -6,6 +6,7 @@ library(shinyWidgets)
 # Carregando UI
 source("ui_qualidade.R")
 source("ui_trimagem.R")
+source("projetos.R")
 
 # FRONT
 
@@ -24,28 +25,34 @@ ui <- fluidPage(
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "trimagem.css")),
   
   # Página de Navegação
+  # Página de navegação
   page_navbar(
-    # HEADER
-    title = tags$span(tags$img(src = "logo-principal-sf.png", id = "logo-fixo"),
-                      "INTRA",
-                      class = "titulo-app",
-                      style = "margin-right: 60px;"
+    # Cabeçalho principal
+    title = tags$span(
+      tags$img(
+        src = "logo-principal-sf.png",
+        id = "logo-fixo"
+      ),
+      "INTRA",
+      class = "titulo-app",
+      style = "margin-right: 60px;"
     ),
     
-    # QUALIDADE 
-    nav_panel("Qualidade",
-              qualidadeUI("qualidade_id") 
-    ), 
-    
-    # TRIMAGEM
-    nav_panel("Trimagem",
-              trimagemUI("trimagem_id")
-    ), 
+    # Única seção principal
+    nav_panel(
+      "",
+      projetosUI("projetos_id")
+    ),
     
     nav_spacer(),
     
     # Controlador de modo claro/escuro
-    nav_item(input_dark_mode(id = "mode", mode = "light")), 
+    nav_item(
+      input_dark_mode(
+        id = "mode",
+        mode = "light"
+      )
+    ),
     
     id = "page"
   )

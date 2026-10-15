@@ -18,6 +18,8 @@ server <- function(input, output, session) {
   html_content <- HTML(paste(readLines("www/apresentacao.html",
                                        encoding = "UTF-8"), collapse = "\n"))
   
+  projetosServer("projetos_id", diretorio_projetos = "dados/projetos")
+  
   # Cria uma tela inicial como se fosse uma caixa de dialogo
   showModal(modalDialog(title = NULL,
                         html_content,
